@@ -16,12 +16,10 @@ pacman -Syu mingw-w64-x86_64-{cmake,ninja,gcc,libconfig,spdlog,uriparser,poco,qt
 cmake -B .Release -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build .Release
 ```
 
-复制所有动态库和 Qt 依赖到 `.Release` 目录
+复制 `.Release/cake.exe` 和所有依赖到 `artifacts` 目录
 
 ```bash
-cd .Release
-./_deps/candy-src/scripts/search-deps.sh cake.exe .
-windeployqt6.exe cake.exe .
+./winqtcollect.sh .Release/cake.exe artifacts
 ```
 
-此时在 Windows 资源管理器找到 `.Release` 目录并执行 `cake.exe`,一切正常的话将能看界面.
+此时在 Windows 资源管理器找到 `artifacts` 目录并执行 `cake.exe`,一切正常的话将能看界面.
