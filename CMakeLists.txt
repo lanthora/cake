@@ -9,7 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Gui)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core)
 
 add_executable(cake
     main.cc
@@ -17,9 +17,10 @@ add_executable(cake
     candylist.h candylist.cc
     candyitem.h candyitem.cc
     detailarea.h detailarea.cc
+    images.qrc
 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Gui)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Gui Qt6::Core)
 
 set_target_properties(cake PROPERTIES
     ${BUNDLE_ID_OPTION}
@@ -27,7 +28,6 @@ set_target_properties(cake PROPERTIES
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
-    QT_TARGET_DESCRIPTION "Cake"
 )
 
 include(FetchContent)
