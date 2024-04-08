@@ -7,6 +7,10 @@ class CandyItem : public QListWidgetItem
 {
 public:
     explicit CandyItem();
+    ~CandyItem();
+
+private:
+    void *candy = nullptr;
 };
 
 #endif // CANDYITEM_H

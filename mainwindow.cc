@@ -1,64 +1,37 @@
 #include "mainwindow.h"
-#include "candyitem.h"
-#include "candylist.h"
-#include "detailarea.h"
 #include <QApplication>
 #include <QHBoxLayout>
 #include <QListWidget>
 #include <QMenu>
+#include <QMenuBar>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QWidgetAction>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    // 设置窗口标题
-    setWindowTitle("Cake");
+    setWindowTitle("CAKE");
+    setFixedSize(800, 600);
 
-    // 创建左侧列表
-    CandyList *list = new CandyList;
-    list->addItem(new CandyItem);
-    list->addItem(new CandyItem);
-
-    // 创建右侧详细信息区域
-    DetailArea *detailArea = new DetailArea;
-
-    // 将列表和详细信息区域添加到主窗口
-    setCentralWidget(new QWidget);
-    QHBoxLayout *layout = new QHBoxLayout;
-    layout->addWidget(list, 1);
-    layout->addWidget(detailArea, 3);
-    centralWidget()->setLayout(layout);
-
-    // 连接列表的 itemClicked() 信号到详细信息区域的更新函数
-    connect(list, &QListWidget::itemClicked, detailArea, &DetailArea::update);
-
-    // 通过系统托盘退出
-    if (QSystemTrayIcon ::isSystemTrayAvailable()) {
-        // TODO: 替换成好看的图标
-        QIcon quitIcon = QApplication::style()->standardIcon(QStyle::SP_TabCloseButton);
-        QIcon logoIcon = QApplication::style()->standardIcon(QStyle::SP_TitleBarMenuButton);
-
-        QAction *quitAction = new QAction(quitIcon, "Quit");
-        connect(quitAction, &QAction::triggered, this, &MainWindow::quit);
-
-        QMenu *trayMenu = new QMenu(this);
-        trayMenu->addAction(quitAction);
-
-        trayIcon = new QSystemTrayIcon(this);
-        connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::onSystemTrayActivated);
-        trayIcon->setIcon(logoIcon);
-        trayIcon->setToolTip("Candy");
-        trayIcon->setContextMenu(trayMenu);
-        trayIcon->show();
-    }
+    addFileMenu();
+    addEditMenu();
+    addHelpMenu();
+    addCentralWidget();
+    addSystemTray();
 }
 
 MainWindow::~MainWindow() {}
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    // 有系统托盘,后台运行
+    // 在菜单里选择退出时无需确认直接退出
+    if (forceQuit) {
+        event->accept();
+        return;
+    }
+
+    // 点击 X 退出,有系统托盘,发送通知并以托盘形式运行
     if (QSystemTrayIcon ::isSystemTrayAvailable()) {
         if (backgroundNotification) {
             backgroundNotification = false;
@@ -69,19 +42,18 @@ void MainWindow::closeEvent(QCloseEvent *event)
         return;
     }
 
-    // 没有系统托盘,退出前确认
+    // 点击 X 退出,但没有系统托盘,退出前确认
     if (QMessageBox::question(this, "退出", "退出后将断开所有虚拟网络连接,确认退出?")
         == QMessageBox::No) {
         event->ignore();
         return;
     }
-
-    // 退出
     event->accept();
 }
 
 void MainWindow::onSystemTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
+    // 左键点击托盘图标隐藏或恢复主窗口
     if (reason == QSystemTrayIcon::Trigger) {
         if (isVisible() && !isMinimized()) {
             hide();
@@ -94,5 +66,62 @@ void MainWindow::onSystemTrayActivated(QSystemTrayIcon::ActivationReason reason)
 void MainWindow::quit()
 {
     backgroundNotification = false;
+    forceQuit = true;
     qApp->quit();
+}
+
+void MainWindow::addFileMenu()
+{
+    QMenu *fileMenu = menuBar()->addMenu("文件");
+    QAction *quitAction = new QAction("退出");
+    connect(quitAction, &QAction::triggered, this, &MainWindow::quit);
+
+    fileMenu->addAction(quitAction);
+}
+
+void MainWindow::addEditMenu()
+{
+    QMenu *settingMenu = menuBar()->addMenu("编辑");
+    QAction *autoStartAction = new QAction("启动选项");
+
+    settingMenu->addAction(autoStartAction);
+}
+
+void MainWindow::addHelpMenu()
+{
+    QMenu *helpMenu = menuBar()->addMenu("帮助");
+    QAction *feedbackAction = new QAction("问题反馈");
+
+    helpMenu->addAction(feedbackAction);
+}
+
+void MainWindow::addCentralWidget()
+{
+    // 创建左侧列表
+    candyList = new CandyList;
+
+    // 创建右侧详细信息区域
+    detailArea = new DetailArea;
+
+    // 将列表和详细信息区域添加到主窗口
+    setCentralWidget(new QWidget);
+    QHBoxLayout *layout = new QHBoxLayout;
+    layout->addWidget(candyList, 1);
+    layout->addWidget(detailArea, 3);
+    centralWidget()->setLayout(layout);
+
+    // 连接列表的 itemClicked() 信号到详细信息区域的更新函数
+    connect(candyList, &QListWidget::itemClicked, detailArea, &DetailArea::update);
+}
+
+void MainWindow::addSystemTray()
+{
+    // 通过系统托盘退出
+    if (QSystemTrayIcon ::isSystemTrayAvailable()) {
+        trayIcon = new QSystemTrayIcon(this);
+        connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::onSystemTrayActivated);
+        trayIcon->setIcon(QIcon(":/logo.png"));
+        trayIcon->setToolTip("CAKE");
+        trayIcon->show();
+    }
 }
