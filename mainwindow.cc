@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include <QApplication>
+#include <QGraphicsDropShadowEffect>
 #include <QHBoxLayout>
 #include <QListWidget>
 #include <QMenu>
@@ -11,13 +12,13 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    setWindowTitle("CAKE");
-    setFixedSize(800, 600);
+    setWindowTitle("组网工具");
+    setFixedSize(850, 610);
 
+    addCentralWidget();
     addFileMenu();
     addEditMenu();
     addHelpMenu();
-    addCentralWidget();
     addSystemTray();
 }
 
@@ -73,9 +74,12 @@ void MainWindow::quit()
 void MainWindow::addFileMenu()
 {
     QMenu *fileMenu = menuBar()->addMenu("文件");
+    QAction *newAction = new QAction("新建");
     QAction *quitAction = new QAction("退出");
+    connect(newAction, &QAction::triggered, detailArea, &DetailArea::reset);
     connect(quitAction, &QAction::triggered, this, &MainWindow::quit);
 
+    fileMenu->addAction(newAction);
     fileMenu->addAction(quitAction);
 }
 
@@ -97,17 +101,14 @@ void MainWindow::addHelpMenu()
 
 void MainWindow::addCentralWidget()
 {
-    // 创建左侧列表
-    candyList = new CandyList;
-
-    // 创建右侧详细信息区域
-    detailArea = new DetailArea;
+    // 右侧保存时追加左侧列表
+    detailArea->setCandyList(candyList);
 
     // 将列表和详细信息区域添加到主窗口
     setCentralWidget(new QWidget);
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(candyList, 1);
-    layout->addWidget(detailArea, 3);
+    layout->addWidget(detailArea, 2);
     centralWidget()->setLayout(layout);
 
     // 连接列表的 itemClicked() 信号到详细信息区域的更新函数

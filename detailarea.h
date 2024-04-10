@@ -1,10 +1,13 @@
 #ifndef DETAILAREA_H
 #define DETAILAREA_H
 
+#include "candyitem.h"
+#include "candylist.h"
 #include <QFrame>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidgetItem>
+#include <QPushButton>
 #include <QVBoxLayout>
 
 class DetailArea : public QFrame
@@ -13,8 +16,11 @@ class DetailArea : public QFrame
 
 public:
     explicit DetailArea();
+    void setCandyList(CandyList *candyList);
     void update(QListWidgetItem *item);
+    void reset();
     void save();
+    void remove();
 
 private:
     QWidget *detailWidget = nullptr;
@@ -29,8 +35,13 @@ private:
     QLineEdit *discovery = new QLineEdit;
     QLineEdit *route = new QLineEdit;
     QLineEdit *localhost = new QLineEdit;
+    QPushButton *removeButton = new QPushButton("删除");
+    QPushButton *saveButton = new QPushButton("保存");
     QWidget *createInputWidget(QString label, QLineEdit *input);
     QWidget *createSaveButton();
+
+private:
+    CandyList *candyList = nullptr;
 };
 
 #endif // DETAILAREA_H

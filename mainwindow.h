@@ -34,7 +34,7 @@ private:
     bool backgroundNotification = true;
     bool forceQuit = false;
 
-    CandyList *candyList = nullptr;
-    DetailArea *detailArea = nullptr;
+    CandyList *candyList = new CandyList;
+    DetailArea *detailArea = new DetailArea;
 };
 #endif // MAINWINDOW_H
