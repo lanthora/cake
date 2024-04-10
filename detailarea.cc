@@ -124,14 +124,18 @@ void DetailArea::save()
 
 void DetailArea::remove()
 {
+    removeButton->setEnabled(false);
     int row = candyList->currentRow();
     QListWidgetItem *item = candyList->takeItem(row);
     settings->remove(item->text());
     delete item;
 
-    candyList->setCurrentRow(row < candyList->count() ? row : candyList->count() - 1);
     if (candyList->count() == 0) {
         reset();
+    } else if (candyList->count() > row) {
+        selectItem(candyList->item(row));
+    } else {
+        selectItem(candyList->item(candyList->count() - 1));
     }
     return;
 }
