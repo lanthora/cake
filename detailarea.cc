@@ -48,6 +48,7 @@ void DetailArea::selectItem(QListWidgetItem *item)
     websocket->setText(settings->value("websocket").toString());
     password->setText(settings->value("password").toString());
     tun->setText(settings->value("tun").toString());
+    stun->setText(settings->value("stun").toString());
     port->setText(settings->value("port").toString());
     discovery->setText(settings->value("discovery").toString());
     route->setText(settings->value("route").toString());
