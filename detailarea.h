@@ -8,6 +8,7 @@
 #include <QLineEdit>
 #include <QListWidgetItem>
 #include <QPushButton>
+#include <QSettings>
 #include <QVBoxLayout>
 
 class DetailArea : public QFrame
@@ -17,7 +18,7 @@ class DetailArea : public QFrame
 public:
     explicit DetailArea();
     void setCandyList(CandyList *candyList);
-    void update(QListWidgetItem *item);
+    void selectItem(QListWidgetItem *item);
     void reset();
     void save();
     void remove();
@@ -42,6 +43,7 @@ private:
 
 private:
     CandyList *candyList = nullptr;
+    QSettings *settings = new QSettings("canets", "cake");
 };
 
 #endif // DETAILAREA_H
