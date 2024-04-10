@@ -43,5 +43,15 @@ jobs:
     - name: upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: cake-windows
+        name: cake-portable
         path: artifacts
+    - name: installer
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
+      with:
+        path: setup.iss
+    - name: upload installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: cake-installer
+        path: installer
+

@@ -19,7 +19,7 @@ recursive_search_deps () {
       fi
 
       # Copy the dependency to the specified directory
-      cp "$dep" "$2"
+      cp -n "$dep" "$2"
       # Output the copied file path and name
       echo "Copied $dep to $2"
 
