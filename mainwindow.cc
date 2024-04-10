@@ -122,7 +122,7 @@ void MainWindow::addSystemTray()
         trayIcon = new QSystemTrayIcon(this);
         connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::onSystemTrayActivated);
         trayIcon->setIcon(QIcon(":/logo.png"));
-        trayIcon->setToolTip("CAKE");
+        trayIcon->setToolTip("组网工具");
         trayIcon->show();
     }
 }
