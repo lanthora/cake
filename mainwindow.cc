@@ -112,7 +112,7 @@ void MainWindow::addCentralWidget()
     centralWidget()->setLayout(layout);
 
     // 连接列表的 itemClicked() 信号到详细信息区域的更新函数
-    connect(candyList, &QListWidget::itemClicked, detailArea, &DetailArea::update);
+    connect(candyList, &QListWidget::itemClicked, detailArea, &DetailArea::selectItem);
 }
 
 void MainWindow::addSystemTray()

@@ -35,15 +35,24 @@ void DetailArea::setCandyList(CandyList *candyList)
     }
 }
 
-void DetailArea::update(QListWidgetItem *item)
+void DetailArea::selectItem(QListWidgetItem *item)
 {
     candyList->setCurrentItem(item);
     name->setEnabled(false);
     removeButton->setEnabled(true);
     detailWidget->show();
 
-    // TODO: 根据传入的 item 信息更新界面
     name->setText(item->text());
+
+    settings->beginGroup(item->text());
+    websocket->setText(settings->value("websocket").toString());
+    password->setText(settings->value("password").toString());
+    tun->setText(settings->value("tun").toString());
+    port->setText(settings->value("port").toString());
+    discovery->setText(settings->value("discovery").toString());
+    route->setText(settings->value("route").toString());
+    localhost->setText(settings->value("localhost").toString());
+    settings->endGroup();
 
     return;
 }
@@ -97,14 +106,28 @@ void DetailArea::save()
         item = candyList->currentItem();
     }
 
-    update(item);
+    settings->beginGroup(item->text());
+    settings->setValue("websocket", websocket->text());
+    settings->setValue("password", password->text());
+    settings->setValue("tun", tun->text());
+    settings->setValue("stun", stun->text());
+    settings->setValue("port", port->text());
+    settings->setValue("discovery", discovery->text());
+    settings->setValue("route", route->text());
+    settings->setValue("localhost", localhost->text());
+    settings->endGroup();
+
+    selectItem(item);
     return;
 }
 
 void DetailArea::remove()
 {
     int row = candyList->currentRow();
-    delete candyList->takeItem(row);
+    QListWidgetItem *item = candyList->takeItem(row);
+    settings->remove(item->text());
+    delete item;
+
     candyList->setCurrentRow(row < candyList->count() ? row : candyList->count() - 1);
     if (candyList->count() == 0) {
         reset();
