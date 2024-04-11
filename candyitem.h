@@ -1,8 +1,6 @@
 #ifndef CANDYITEM_H
 #define CANDYITEM_H
 
-#include <mutex>
-#include <string>
 #include <thread>
 #include <QListWidgetItem>
 #include <queue>

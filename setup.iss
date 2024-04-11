@@ -4,7 +4,8 @@
 #define MyAppURL "https://github.com/lanthora/cake"
 #define MyAppExeName "cake.exe"
 #define MyAppBuildDir "artifacts"
-#define MyOutputDir "installer"
+#define MyAppOutputDir "installer"
+#define MyAppLogo "logo.ico"
 
 [Setup]
 AppId={{5068A825-71E9-41D2-A72D-E7260E187122}
@@ -17,8 +18,9 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName=C:\Program Files\{#MyAppName}
 DisableProgramGroupPage=yes
-OutputDir={#MyOutputDir}
+OutputDir={#MyAppOutputDir}
 OutputBaseFilename={#MyAppName}-{#MyAppVersion}
+SetupIconFile=logo.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -32,10 +34,11 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "{#MyAppBuildDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#MyAppLogo}"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: {app}\{#MyAppLogo}
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: {app}\{#MyAppLogo}; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Flags: nowait postinstall runascurrentuser

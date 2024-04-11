@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QGraphicsDropShadowEffect>
 #include <QHBoxLayout>
+#include <QIcon>
 #include <QListWidget>
 #include <QMenu>
 #include <QMenuBar>
@@ -14,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setWindowTitle("组网工具");
     setFixedSize(850, 610);
+    setWindowIcon(QIcon(":/logo.ico"));
 
     addCentralWidget();
     addFileMenu();
@@ -121,7 +123,7 @@ void MainWindow::addSystemTray()
     if (QSystemTrayIcon ::isSystemTrayAvailable()) {
         trayIcon = new QSystemTrayIcon(this);
         connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::onSystemTrayActivated);
-        trayIcon->setIcon(QIcon(":/logo.png"));
+        trayIcon->setIcon(QIcon(":/logo.ico"));
         trayIcon->setToolTip("组网工具");
         trayIcon->show();
     }

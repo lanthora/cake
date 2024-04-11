@@ -1,7 +1,6 @@
 #ifndef DETAILAREA_H
 #define DETAILAREA_H
 
-#include "candyitem.h"
 #include "candylist.h"
 #include <QFrame>
 #include <QLabel>

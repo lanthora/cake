@@ -1,7 +1,5 @@
 #include "candyitem.h"
 #include "candy.h"
-#include <iomanip>
-#include <iostream>
 #include <random>
 #include <sstream>
 #include <QSettings>
