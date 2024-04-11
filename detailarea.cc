@@ -32,6 +32,12 @@ void DetailArea::setCandyList(CandyList *candyList)
 
     if (candyList->count() == 0) {
         reset();
+
+        name->setText("demo");
+        websocket->setText("wss://canets.org/demo");
+        stun->setText("stun://stun.canets.org");
+        discovery->setText("300");
+        route->setText("5");
     }
 }
 
@@ -89,7 +95,7 @@ void DetailArea::save()
         return;
     }
 
-    QListWidgetItem *item = nullptr;
+    CandyItem *item = nullptr;
 
     // 新增配置,确保网卡名不重复
     if (name->isEnabled()) {
@@ -104,7 +110,7 @@ void DetailArea::save()
         item->setText((name->text()));
         candyList->addItem(item);
     } else {
-        item = candyList->currentItem();
+        item = dynamic_cast<CandyItem *>(candyList->currentItem());
     }
 
     settings->beginGroup(item->text());
@@ -117,6 +123,9 @@ void DetailArea::save()
     settings->setValue("route", route->text());
     settings->setValue("localhost", localhost->text());
     settings->endGroup();
+    settings->sync();
+
+    item->update();
 
     selectItem(item);
     return;
@@ -126,8 +135,10 @@ void DetailArea::remove()
 {
     removeButton->setEnabled(false);
     int row = candyList->currentRow();
-    QListWidgetItem *item = candyList->takeItem(row);
+    CandyItem *item = dynamic_cast<CandyItem *>(candyList->takeItem(row));
+    item->shutdown();
     settings->remove(item->text());
+    settings->sync();
     delete item;
 
     if (candyList->count() == 0) {
