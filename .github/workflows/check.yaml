@@ -39,7 +39,9 @@ jobs:
       run: cmake -B .Release -DCMAKE_BUILD_TYPE=Release && cmake --build .Release
     - name: collect
       shell: msys2 {0}
-      run: ./winqtcollect.sh .Release/cake.exe artifacts
+      run: |
+        ./winqtcollect.sh .Release/cake.exe artifacts
+        cp .Release/_deps/candy-build/src/tun/wintun/bin/amd64/wintun.dll artifacts
     - name: upload artifact
       uses: actions/upload-artifact@v4
       with:

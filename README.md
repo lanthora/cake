@@ -16,10 +16,11 @@ pacman -Syu mingw-w64-x86_64-{cmake,ninja,gcc,libconfig,spdlog,uriparser,poco,qt
 cmake -B .Release -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build .Release
 ```
 
-复制 `.Release/cake.exe` 和所有依赖到 `artifacts` 目录
+执行以下命令复制 `.Release/cake.exe` 和所有依赖到 `artifacts` 目录
 
 ```bash
 ./winqtcollect.sh .Release/cake.exe artifacts
+cp .Release/_deps/candy-build/src/tun/wintun/bin/amd64/wintun.dll artifacts
 ```
 
 此时在 Windows 资源管理器找到 `artifacts` 目录并执行 `cake.exe`,一切正常的话将能看界面.
