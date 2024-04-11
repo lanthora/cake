@@ -7,6 +7,7 @@ class CandyList : public QListWidget
 {
 public:
     explicit CandyList();
+    ~CandyList();
 };
 
 #endif // CANDYLIST_H
