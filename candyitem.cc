@@ -5,7 +5,8 @@
 #include <QSettings>
 
 std::thread CandyItem::keepAliveThread;
-std::queue<void *> CandyItem::candyQueue;
+std::queue<std::weak_ptr<void>> CandyItem::candyQueue;
+std::map<void *, std::weak_ptr<void>> CandyItem::candyRawWeakMap;
 bool CandyItem::running;
 
 void address_update_callback(const char *name, const char *address)
@@ -22,12 +23,13 @@ CandyItem::CandyItem()
     setTextAlignment(Qt::AlignCenter);
     setSizeHint(QSize(0, 40));
 
-    candy = candy_client_create();
+    candy = std::shared_ptr<void>(candy_client_create(), candy_client_release);
+    CandyItem::candyRawWeakMap[candy.get()] = candy;
 }
 
 CandyItem::~CandyItem()
 {
-    candy_client_release(candy);
+    CandyItem::candyRawWeakMap.erase(candy.get());
 }
 
 void CandyItem::update()
@@ -35,7 +37,7 @@ void CandyItem::update()
     auto toStdString = [](QVariant value) { return value.toString().toStdString(); };
     QSettings settings("canets", "cake");
 
-    candy_client_set_name(candy, toStdString(text()).c_str());
+    candy_client_set_name(candy.get(), toStdString(text()).c_str());
 
     settings.beginGroup(text());
 
@@ -43,27 +45,27 @@ void CandyItem::update()
         settings.setValue("vmac", randomHexString(16));
     }
 
-    candy_client_set_virtual_mac(candy, toStdString(settings.value("vmac")).c_str());
-    candy_client_set_password(candy, toStdString(settings.value("password")).c_str());
-    candy_client_set_websocket_server(candy, toStdString(settings.value("websocket")).c_str());
-    candy_client_set_tun_address(candy, toStdString(settings.value("tun")).c_str());
-    candy_client_set_expected_address(candy, toStdString(settings.value("expected")).c_str());
-    candy_client_set_stun(candy, toStdString(settings.value("stun")).c_str());
-    candy_client_set_discovery_interval(candy, settings.value("discovery").toInt());
-    candy_client_set_route_cost(candy, settings.value("route").toInt());
-    candy_client_set_udp_bind_port(candy, settings.value("port").toInt());
-    candy_client_set_localhost(candy, toStdString(settings.value("localhost")).c_str());
+    candy_client_set_virtual_mac(candy.get(), toStdString(settings.value("vmac")).c_str());
+    candy_client_set_password(candy.get(), toStdString(settings.value("password")).c_str());
+    candy_client_set_websocket_server(candy.get(), toStdString(settings.value("websocket")).c_str());
+    candy_client_set_tun_address(candy.get(), toStdString(settings.value("tun")).c_str());
+    candy_client_set_expected_address(candy.get(), toStdString(settings.value("expected")).c_str());
+    candy_client_set_stun(candy.get(), toStdString(settings.value("stun")).c_str());
+    candy_client_set_discovery_interval(candy.get(), settings.value("discovery").toInt());
+    candy_client_set_route_cost(candy.get(), settings.value("route").toInt());
+    candy_client_set_udp_bind_port(candy.get(), settings.value("port").toInt());
+    candy_client_set_localhost(candy.get(), toStdString(settings.value("localhost")).c_str());
 
     settings.endGroup();
 
-    candy_client_set_address_update_callback(candy, address_update_callback);
+    candy_client_set_address_update_callback(candy.get(), address_update_callback);
 
     CandyItem::candyQueue.push(candy);
 }
 
 void CandyItem::shutdown()
 {
-    candy_client_shutdown(candy);
+    candy_client_shutdown(candy.get());
 }
 
 int CandyItem::randomHex()
@@ -87,7 +89,10 @@ QString CandyItem::randomHexString(int length)
 
 void candyErrorCallback(void *candy)
 {
-    CandyItem::candyQueue.push(candy);
+    auto it = CandyItem::candyRawWeakMap.find(candy);
+    if (it != CandyItem::candyRawWeakMap.end()) {
+        CandyItem::candyQueue.push(it->second);
+    }
 }
 
 void CandyItem::startKeepAlive()
@@ -97,9 +102,12 @@ void CandyItem::startKeepAlive()
     keepAliveThread = std::thread([&] {
         while (running) {
             if (!candyQueue.empty()) {
-                void *candy = candyQueue.front();
-                candy_client_shutdown(candy);
-                candy_client_run(candy);
+                auto candy = candyQueue.front().lock();
+                if (candy) {
+                    candy_client_shutdown(candy.get());
+                    candy_client_run(candy.get());
+                }
+
                 candyQueue.pop();
             }
             std::this_thread::sleep_for(std::chrono::seconds(3));
