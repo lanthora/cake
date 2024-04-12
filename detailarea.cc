@@ -59,6 +59,7 @@ void DetailArea::selectItem(QListWidgetItem *item)
     discovery->setText(settings->value("discovery").toString());
     route->setText(settings->value("route").toString());
     localhost->setText(settings->value("localhost").toString());
+    item->setToolTip(settings->value("expected").toString());
     settings->endGroup();
 
     return;
