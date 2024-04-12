@@ -1,6 +1,7 @@
 #ifndef CANDYITEM_H
 #define CANDYITEM_H
 
+#include <map>
 #include <thread>
 #include <QListWidgetItem>
 #include <queue>
@@ -15,7 +16,7 @@ public:
     void shutdown();
 
 private:
-    void *candy = nullptr;
+    std::shared_ptr<void> candy;
     int randomHex();
     QString randomHexString(int length);
 
@@ -26,7 +27,8 @@ public:
 private:
     friend void candyErrorCallback(void *candy);
     static std::thread keepAliveThread;
-    static std::queue<void *> candyQueue;
+    static std::queue<std::weak_ptr<void>> candyQueue;
+    static std::map<void *, std::weak_ptr<void>> candyRawWeakMap;
     static bool running;
 };
 
