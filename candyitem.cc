@@ -98,7 +98,6 @@ void candyErrorCallback(void *candy)
 void CandyItem::startKeepAlive()
 {
     running = true;
-    candy_client_use_system_time();
     keepAliveThread = std::thread([&] {
         while (running) {
             if (!candyQueue.empty()) {

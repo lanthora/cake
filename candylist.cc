@@ -1,9 +1,16 @@
 #include "candylist.h"
+#include "candy.h"
 #include "candyitem.h"
 #include <QSettings>
 
 CandyList::CandyList()
 {
+    candy_use_system_time();
+
+    if (QSysInfo::productType() == "windows") {
+        candy_set_log_path("C:/ProgramData/Cake/logs/daily");
+    }
+
     CandyItem::startKeepAlive();
 
     QSettings settings("canets", "cake");
