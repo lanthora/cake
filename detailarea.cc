@@ -106,7 +106,7 @@ void DetailArea::save()
                 return;
             }
         }
-        // TODO: 读出参数,根据网卡名更新配置,并重启对应的网络
+        // 读出参数,根据网卡名更新配置,并重启对应的网络
         item = new CandyItem;
         item->setText((name->text()));
         candyList->addItem(item);

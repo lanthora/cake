@@ -29,5 +29,6 @@ CandyList::~CandyList()
     while (count() > 0) {
         CandyItem *item = dynamic_cast<CandyItem *>(takeItem(0));
         item->shutdown();
+        delete item;
     }
 }

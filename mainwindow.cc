@@ -120,11 +120,19 @@ void MainWindow::addCentralWidget()
 void MainWindow::addSystemTray()
 {
     // 通过系统托盘退出
-    if (QSystemTrayIcon ::isSystemTrayAvailable()) {
+    if (QSystemTrayIcon::isSystemTrayAvailable()) {
+        QIcon quitIcon = QApplication::style()->standardIcon(QStyle::SP_TabCloseButton);
+        QAction *quitAction = new QAction(quitIcon, "退出");
+        connect(quitAction, &QAction::triggered, this, &MainWindow::quit);
+
+        QMenu *trayMenu = new QMenu(this);
+        trayMenu->addAction(quitAction);
+
         trayIcon = new QSystemTrayIcon(this);
         connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::onSystemTrayActivated);
         trayIcon->setIcon(QIcon(":/logo.ico"));
         trayIcon->setToolTip("组网工具");
+        trayIcon->setContextMenu(trayMenu);
         trayIcon->show();
     }
 }
