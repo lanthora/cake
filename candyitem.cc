@@ -109,7 +109,7 @@ void CandyItem::startKeepAlive()
 
                 candyQueue.pop();
             }
-            std::this_thread::sleep_for(std::chrono::seconds(3));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     });
     candy_client_set_error_cb(candyErrorCallback);
