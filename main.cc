@@ -14,6 +14,5 @@ int main(int argc, char *argv[])
     shared.create(1);
 
     MainWindow w;
-    w.show();
     return a.exec();
 }
