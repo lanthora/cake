@@ -17,7 +17,7 @@ add_executable(cake
     candylist.h candylist.cc
     candyitem.h candyitem.cc
     detailarea.h detailarea.cc
-    images.qrc
+    images.qrc admin.rc
 )
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Gui Qt6::Core)
