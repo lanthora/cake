@@ -7,7 +7,7 @@
 std::thread CandyItem::keepAliveThread;
 std::queue<std::weak_ptr<void>> CandyItem::candyQueue;
 std::map<void *, std::weak_ptr<void>> CandyItem::candyRawWeakMap;
-bool CandyItem::running;
+volatile bool CandyItem::running;
 
 void address_update_callback(const char *name, const char *address)
 {

@@ -29,7 +29,7 @@ private:
     static std::thread keepAliveThread;
     static std::queue<std::weak_ptr<void>> candyQueue;
     static std::map<void *, std::weak_ptr<void>> candyRawWeakMap;
-    static bool running;
+    static volatile bool running;
 };
 
 #endif // CANDYITEM_H

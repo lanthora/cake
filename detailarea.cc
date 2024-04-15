@@ -154,9 +154,9 @@ void DetailArea::remove()
 
 QWidget *DetailArea::createInputWidget(QString key, QLineEdit *input)
 {
-    QWidget *widget = new QWidget;
+    QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
-    QLabel *label = new QLabel;
+    QLabel *label = new QLabel(this);
     label->setText(key);
     label->setFixedWidth(110);
     label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -170,7 +170,7 @@ QWidget *DetailArea::createInputWidget(QString key, QLineEdit *input)
 
 QWidget *DetailArea::createSaveButton()
 {
-    QWidget *widget = new QWidget;
+    QWidget *widget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(widget);
 
     connect(removeButton, &QPushButton::clicked, this, &DetailArea::remove);

@@ -26,23 +26,23 @@ private:
     QWidget *detailWidget = nullptr;
 
 private:
-    QLineEdit *name = new QLineEdit;
-    QLineEdit *websocket = new QLineEdit;
-    QLineEdit *password = new QLineEdit;
-    QLineEdit *tun = new QLineEdit;
-    QLineEdit *stun = new QLineEdit;
-    QLineEdit *port = new QLineEdit;
-    QLineEdit *discovery = new QLineEdit;
-    QLineEdit *route = new QLineEdit;
-    QLineEdit *localhost = new QLineEdit;
-    QPushButton *removeButton = new QPushButton("删除");
-    QPushButton *saveButton = new QPushButton("保存");
+    QLineEdit *name = new QLineEdit(this);
+    QLineEdit *websocket = new QLineEdit(this);
+    QLineEdit *password = new QLineEdit(this);
+    QLineEdit *tun = new QLineEdit(this);
+    QLineEdit *stun = new QLineEdit(this);
+    QLineEdit *port = new QLineEdit(this);
+    QLineEdit *discovery = new QLineEdit(this);
+    QLineEdit *route = new QLineEdit(this);
+    QLineEdit *localhost = new QLineEdit(this);
+    QPushButton *removeButton = new QPushButton("删除", this);
+    QPushButton *saveButton = new QPushButton("保存", this);
     QWidget *createInputWidget(QString label, QLineEdit *input);
     QWidget *createSaveButton();
 
 private:
     CandyList *candyList = nullptr;
-    QSettings *settings = new QSettings("canets", "cake");
+    QSettings *settings = new QSettings("canets", "cake", this);
 };
 
 #endif // DETAILAREA_H
