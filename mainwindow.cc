@@ -66,7 +66,7 @@ void MainWindow::onSystemTrayActivated(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
-void MainWindow::quit()
+void MainWindow::directQuit()
 {
     backgroundNotification = false;
     forceQuit = true;
@@ -76,10 +76,10 @@ void MainWindow::quit()
 void MainWindow::addFileMenu()
 {
     QMenu *fileMenu = menuBar()->addMenu("文件");
-    QAction *newAction = new QAction("新建");
-    QAction *quitAction = new QAction("退出");
+    QAction *newAction = new QAction("新建", fileMenu);
+    QAction *quitAction = new QAction("退出", fileMenu);
     connect(newAction, &QAction::triggered, detailArea, &DetailArea::reset);
-    connect(quitAction, &QAction::triggered, this, &MainWindow::quit);
+    connect(quitAction, &QAction::triggered, this, &MainWindow::directQuit);
 
     fileMenu->addAction(newAction);
     fileMenu->addAction(quitAction);
@@ -88,7 +88,7 @@ void MainWindow::addFileMenu()
 void MainWindow::addEditMenu()
 {
     QMenu *settingMenu = menuBar()->addMenu("编辑");
-    QAction *autoStartAction = new QAction("启动选项");
+    QAction *autoStartAction = new QAction("启动选项", settingMenu);
 
     settingMenu->addAction(autoStartAction);
 }
@@ -96,21 +96,27 @@ void MainWindow::addEditMenu()
 void MainWindow::addHelpMenu()
 {
     QMenu *helpMenu = menuBar()->addMenu("帮助");
-    QAction *feedbackAction = new QAction("问题反馈");
+    QAction *feedbackAction = new QAction("问题反馈", helpMenu);
 
     helpMenu->addAction(feedbackAction);
 }
 
 void MainWindow::addCentralWidget()
 {
+    candyList->setParent(this);
+    detailArea->setParent(this);
+
     // 右侧保存时追加左侧列表
     detailArea->setCandyList(candyList);
 
     // 将列表和详细信息区域添加到主窗口
-    setCentralWidget(new QWidget);
+    QWidget *placeholder = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(candyList, 1);
     layout->addWidget(detailArea, 2);
+    placeholder->setLayout(layout);
+    setCentralWidget(placeholder);
+
     centralWidget()->setLayout(layout);
 
     // 连接列表的 itemClicked() 信号到详细信息区域的更新函数
@@ -121,11 +127,11 @@ void MainWindow::addSystemTray()
 {
     // 通过系统托盘退出
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
-        QIcon quitIcon = QApplication::style()->standardIcon(QStyle::SP_TabCloseButton);
-        QAction *quitAction = new QAction(quitIcon, "退出");
-        connect(quitAction, &QAction::triggered, this, &MainWindow::quit);
-
         QMenu *trayMenu = new QMenu(this);
+        QIcon quitIcon = QApplication::style()->standardIcon(QStyle::SP_TabCloseButton);
+        QAction *quitAction = new QAction(quitIcon, "退出", trayMenu);
+        connect(quitAction, &QAction::triggered, this, &MainWindow::directQuit);
+
         trayMenu->addAction(quitAction);
 
         trayIcon = new QSystemTrayIcon(this);

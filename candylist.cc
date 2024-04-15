@@ -5,11 +5,14 @@
 
 CandyList::CandyList()
 {
+    candy_init();
     candy_use_system_time();
 
     if (QSysInfo::productType() == "windows") {
         candy_set_log_path("C:/ProgramData/Cake/logs/daily");
     }
+
+    candy_enable_debug();
 
     CandyItem::startKeepAlive();
 
@@ -31,4 +34,6 @@ CandyList::~CandyList()
         item->shutdown();
         delete item;
     }
+
+    candy_release();
 }

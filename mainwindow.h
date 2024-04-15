@@ -18,9 +18,9 @@ public:
 protected:
     void closeEvent(QCloseEvent *event) override;
 
-private slots:
+private:
     void onSystemTrayActivated(QSystemTrayIcon::ActivationReason reason);
-    void quit();
+    void directQuit();
 
 private:
     void addFileMenu();
