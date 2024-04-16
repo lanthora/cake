@@ -3,6 +3,7 @@
 
 #include "candylist.h"
 #include "detailarea.h"
+#include "switchbutton.h"
 #include <QCloseEvent>
 #include <QMainWindow>
 #include <QSystemTrayIcon>
@@ -21,6 +22,7 @@ protected:
 private:
     void onSystemTrayActivated(QSystemTrayIcon::ActivationReason reason);
     void directQuit();
+    QHBoxLayout *createSwitchButtonWidget(QString key, SwitchButton *sb);
 
 private:
     void addFileMenu();
@@ -28,6 +30,7 @@ private:
     void addHelpMenu();
     void addCentralWidget();
     void addSystemTray();
+    void startConfig();
 
 private:
     QSystemTrayIcon *trayIcon = nullptr;

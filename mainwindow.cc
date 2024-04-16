@@ -106,6 +106,7 @@ void MainWindow::addEditMenu()
     // 开机启动: https://discretetom.github.io/posts/qt-windows-launch-on-start/
 
     settingMenu->addAction(autoStartAction);
+    connect(autoStartAction, &QAction::triggered, this, &MainWindow::startConfig);
 }
 
 void MainWindow::addHelpMenu()
@@ -156,4 +157,41 @@ void MainWindow::addSystemTray()
         trayIcon->setContextMenu(trayMenu);
         trayIcon->show();
     }
+}
+
+void MainWindow::startConfig()
+{
+    QDialog startConfig(this);
+    startConfig.setWindowTitle("启动选项");
+    startConfig.resize(500, 300);
+
+    QVBoxLayout *vLayout = new QVBoxLayout(&startConfig);
+
+    SwitchButton *powerBoot = new SwitchButton(&startConfig);
+    SwitchButton *showWindow = new SwitchButton(&startConfig);
+    SwitchButton *showPrompt = new SwitchButton(&startConfig);
+
+    vLayout->addLayout(createSwitchButtonWidget("电脑开机后是否启动软件", powerBoot));
+    vLayout->addLayout(createSwitchButtonWidget("启动后是否显示主界面", showWindow));
+    vLayout->addLayout(createSwitchButtonWidget("是否显示后台运行的提示", showPrompt));
+    vLayout->setContentsMargins(20, 70, 100, 70);
+
+    startConfig.exec();
+}
+
+QHBoxLayout *MainWindow::createSwitchButtonWidget(QString key, SwitchButton *sb)
+{
+    QHBoxLayout *layout = new QHBoxLayout();
+    QLabel *label = new QLabel();
+    label->setText(key);
+    label->setFixedWidth(200);
+    label->setFixedHeight(20);
+    label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    label->setContentsMargins(0, 0, 10, 0);
+
+    sb->setFixedWidth(50);
+    sb->setFixedHeight(20);
+    layout->addWidget(label, 7);
+    layout->addWidget(sb, 1);
+    return layout;
 }
