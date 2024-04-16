@@ -23,11 +23,10 @@ MainWindow::MainWindow(QWidget *parent)
     addHelpMenu();
     addSystemTray();
 
-    // TODO: 读配置决定是否显示主界面
-    show();
-
-    // TODO: 读配置决定是否显示后台运行通知
-    backgroundNotification = true;
+    // 显示主界面
+    if (settings.value("showmainwindow", true).toBool()) {
+        show();
+    }
 }
 
 MainWindow::~MainWindow() {}
@@ -42,8 +41,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     // 点击 X 退出,有系统托盘,发送通知并以托盘形式运行
     if (QSystemTrayIcon ::isSystemTrayAvailable()) {
-        if (backgroundNotification) {
-            backgroundNotification = false;
+        if (settings.value("backgroundnotification", true).toBool()) {
+            settings.setValue("backgroundnotification", false);
+            settings.sync();
             this->trayIcon->showMessage("后台运行", "进程将以托盘的形式在后台持续运行");
         }
         event->ignore();
@@ -74,7 +74,6 @@ void MainWindow::onSystemTrayActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::directQuit()
 {
-    backgroundNotification = false;
     forceQuit = true;
     qApp->quit();
 }
@@ -96,11 +95,9 @@ void MainWindow::addEditMenu()
     QMenu *settingMenu = menuBar()->addMenu("编辑");
     QAction *autoStartAction = new QAction("启动选项", settingMenu);
 
-    // TODO: 点击启动选项弹出界面,有以下三个配置:
-    // 1. 是否开机启动
-    // 2. 启动后是否显示主界面
-    // 3. 是否显示后台运行的提示
-    // 打开界面是从配置文件中读这三个值,如果还没有配置过这三个值就默认返回真.
+    // TODO: 点击启动选项弹出界面,有以下配置:
+    // 1. 是否开机启动: autostartup
+    // 2. 启动后是否显示主界面: showmainwindow
     // 点击保存时,首先将配置写回到配置文件,再设置对应的变量.只有是否开机启动需要主动写注册表,其他变量可以再使用的时候读配置.
     // 在安装时由安装包写入了 HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run
     // 开机启动: https://discretetom.github.io/posts/qt-windows-launch-on-start/

@@ -31,10 +31,10 @@ private:
 
 private:
     QSystemTrayIcon *trayIcon = nullptr;
-    bool backgroundNotification = true;
     bool forceQuit = false;
 
     CandyList *candyList = new CandyList;
     DetailArea *detailArea = new DetailArea;
+    QSettings settings = QSettings("canets", "cake");
 };
 #endif // MAINWINDOW_H

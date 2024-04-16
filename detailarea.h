@@ -42,7 +42,7 @@ private:
 
 private:
     CandyList *candyList = nullptr;
-    QSettings *settings = new QSettings("canets", "cake", this);
+    QSettings settings = QSettings("canets", "cake");
 };
 
 #endif // DETAILAREA_H

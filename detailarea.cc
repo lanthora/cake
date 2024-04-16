@@ -50,17 +50,17 @@ void DetailArea::selectItem(QListWidgetItem *item)
 
     name->setText(item->text());
 
-    settings->beginGroup(item->text());
-    websocket->setText(settings->value("websocket").toString());
-    password->setText(settings->value("password").toString());
-    tun->setText(settings->value("tun").toString());
-    stun->setText(settings->value("stun").toString());
-    port->setText(settings->value("port").toString());
-    discovery->setText(settings->value("discovery").toString());
-    route->setText(settings->value("route").toString());
-    localhost->setText(settings->value("localhost").toString());
-    item->setToolTip(settings->value("expected").toString());
-    settings->endGroup();
+    settings.beginGroup(item->text());
+    websocket->setText(settings.value("websocket").toString());
+    password->setText(settings.value("password").toString());
+    tun->setText(settings.value("tun").toString());
+    stun->setText(settings.value("stun").toString());
+    port->setText(settings.value("port").toString());
+    discovery->setText(settings.value("discovery").toString());
+    route->setText(settings.value("route").toString());
+    localhost->setText(settings.value("localhost").toString());
+    item->setToolTip(settings.value("expected").toString());
+    settings.endGroup();
 
     return;
 }
@@ -114,17 +114,17 @@ void DetailArea::save()
         item = dynamic_cast<CandyItem *>(candyList->currentItem());
     }
 
-    settings->beginGroup(item->text());
-    settings->setValue("websocket", websocket->text());
-    settings->setValue("password", password->text());
-    settings->setValue("tun", tun->text());
-    settings->setValue("stun", stun->text());
-    settings->setValue("port", port->text());
-    settings->setValue("discovery", discovery->text());
-    settings->setValue("route", route->text());
-    settings->setValue("localhost", localhost->text());
-    settings->endGroup();
-    settings->sync();
+    settings.beginGroup(item->text());
+    settings.setValue("websocket", websocket->text());
+    settings.setValue("password", password->text());
+    settings.setValue("tun", tun->text());
+    settings.setValue("stun", stun->text());
+    settings.setValue("port", port->text());
+    settings.setValue("discovery", discovery->text());
+    settings.setValue("route", route->text());
+    settings.setValue("localhost", localhost->text());
+    settings.endGroup();
+    settings.sync();
 
     item->update();
 
@@ -138,8 +138,8 @@ void DetailArea::remove()
     int row = candyList->currentRow();
     CandyItem *item = dynamic_cast<CandyItem *>(candyList->takeItem(row));
     item->shutdown();
-    settings->remove(item->text());
-    settings->sync();
+    settings.remove(item->text());
+    settings.sync();
     delete item;
 
     if (candyList->count() == 0) {
