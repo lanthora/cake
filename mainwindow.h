@@ -35,6 +35,6 @@ private:
 
     CandyList *candyList = new CandyList;
     DetailArea *detailArea = new DetailArea;
-    QSettings settings = QSettings("canets", "cake");
+    QSettings settings;
 };
 #endif // MAINWINDOW_H

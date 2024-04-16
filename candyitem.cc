@@ -11,7 +11,7 @@ volatile bool CandyItem::running;
 
 void address_update_callback(const char *name, const char *address)
 {
-    QSettings settings("canets", "cake");
+    QSettings settings;
     settings.beginGroup(name);
     settings.setValue("expected", address);
     settings.endGroup();
@@ -35,7 +35,7 @@ CandyItem::~CandyItem()
 void CandyItem::update()
 {
     auto toStdString = [](QVariant value) { return value.toString().toStdString(); };
-    QSettings settings("canets", "cake");
+    QSettings settings;
 
     candy_client_set_name(candy.get(), toStdString(text()).c_str());
 

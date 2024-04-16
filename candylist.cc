@@ -16,7 +16,7 @@ CandyList::CandyList()
 
     CandyItem::startKeepAlive();
 
-    QSettings settings("canets", "cake");
+    QSettings settings;
     for (const QString &group : settings.childGroups()) {
         CandyItem *item = new CandyItem;
         item->setText(group);

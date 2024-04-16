@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(cake VERSION 0.1 LANGUAGES CXX)
+project(cake LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -17,6 +17,7 @@ add_executable(cake
     candylist.h candylist.cc
     candyitem.h candyitem.cc
     detailarea.h detailarea.cc
+    startoption.h startoption.cpp
     images.qrc admin.rc
 )
 
@@ -24,9 +25,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Gui Qt6::C
 
 set_target_properties(cake PROPERTIES
     ${BUNDLE_ID_OPTION}
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
 

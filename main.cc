@@ -5,6 +5,9 @@
 
 int main(int argc, char *argv[])
 {
+    QCoreApplication::setOrganizationName("canets");
+    QCoreApplication::setApplicationName("cake");
+
     QApplication a(argc, argv);
     QSharedMemory shared("canets.org/cake");
     if (shared.attach()) {

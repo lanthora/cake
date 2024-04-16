@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "startoption.h"
 #include <QApplication>
 #include <QGraphicsDropShadowEffect>
 #include <QHBoxLayout>
@@ -40,7 +41,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 
     // 点击 X 退出,有系统托盘,发送通知并以托盘形式运行
-    if (QSystemTrayIcon ::isSystemTrayAvailable()) {
+    if (QSystemTrayIcon::isSystemTrayAvailable()) {
         if (settings.value("backgroundnotification", true).toBool()) {
             settings.setValue("backgroundnotification", false);
             settings.sync();
@@ -52,8 +53,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 
     // 点击 X 退出,但没有系统托盘,退出前确认
-    if (QMessageBox::question(this, "退出", "退出后将断开所有虚拟网络连接,确认退出?")
-        == QMessageBox::No) {
+    if (QMessageBox::question(this, "退出", "退出后将断开所有虚拟网络连接,确认退出?") == QMessageBox::No) {
         event->ignore();
         return;
     }
@@ -95,12 +95,8 @@ void MainWindow::addEditMenu()
     QMenu *settingMenu = menuBar()->addMenu("编辑");
     QAction *autoStartAction = new QAction("启动选项", settingMenu);
 
-    // TODO: 点击启动选项弹出界面,有以下配置:
-    // 1. 是否开机启动: autostartup
-    // 2. 启动后是否显示主界面: showmainwindow
-    // 点击保存时,首先将配置写回到配置文件,再设置对应的变量.只有是否开机启动需要主动写注册表,其他变量可以再使用的时候读配置.
-    // 在安装时由安装包写入了 HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run
-    // 开机启动: https://discretetom.github.io/posts/qt-windows-launch-on-start/
+    StartOption *startOption = new StartOption(this);
+    connect(autoStartAction, &QAction::triggered, startOption, &StartOption::show);
 
     settingMenu->addAction(autoStartAction);
 }

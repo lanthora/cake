@@ -1,5 +1,5 @@
 #define MyAppName "Cake"
-#define MyAppVersion "5.5-2"
+#define MyAppVersion "5.5-3"
 #define MyAppPublisher "lanthora"
 #define MyAppURL "https://github.com/lanthora/cake"
 #define MyAppExeName "cake.exe"
@@ -42,6 +42,3 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilen
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Flags: nowait postinstall runascurrentuser
-
-[Registry]
-Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppExeName}"; ValueData: "{app}\{#MyAppExeName}"
