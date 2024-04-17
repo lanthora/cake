@@ -2,6 +2,7 @@
 #define CANDYITEM_H
 
 #include <map>
+#include <mutex>
 #include <thread>
 #include <QListWidgetItem>
 #include <queue>
@@ -28,6 +29,7 @@ private:
     friend void candyErrorCallback(void *candy);
     static std::thread keepAliveThread;
     static std::queue<std::weak_ptr<void>> candyQueue;
+    static std::mutex candyMutex;
     static std::map<void *, std::weak_ptr<void>> candyRawWeakMap;
     static volatile bool running;
 };

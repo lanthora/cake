@@ -29,16 +29,6 @@ DetailArea::DetailArea()
 void DetailArea::setCandyList(CandyList *candyList)
 {
     this->candyList = candyList;
-
-    if (candyList->count() == 0) {
-        reset();
-
-        name->setText("demo");
-        websocket->setText("wss://canets.org/demo");
-        stun->setText("stun://stun.canets.org");
-        discovery->setText("300");
-        route->setText("5");
-    }
 }
 
 void DetailArea::selectItem(QListWidgetItem *item)
@@ -65,7 +55,7 @@ void DetailArea::selectItem(QListWidgetItem *item)
     return;
 }
 
-void DetailArea::reset()
+void DetailArea::reset(bool fillDefault)
 {
     name->setText("");
     websocket->setText("");
@@ -77,10 +67,19 @@ void DetailArea::reset()
     route->setText("");
     localhost->setText("");
 
+    if (fillDefault) {
+        name->setText("demo");
+        websocket->setText("wss://canets.org/demo");
+        stun->setText("stun://stun.canets.org");
+        discovery->setText("300");
+        route->setText("5");
+    }
+
     candyList->clearFocus();
     candyList->clearSelection();
     removeButton->setEnabled(false);
     name->setEnabled(true);
+
     detailWidget->show();
     return;
 }
