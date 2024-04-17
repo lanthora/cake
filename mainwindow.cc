@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "feedback.h"
 #include "startoption.h"
 #include <QApplication>
 #include <QGraphicsDropShadowEffect>
@@ -105,6 +106,9 @@ void MainWindow::addHelpMenu()
 {
     QMenu *helpMenu = menuBar()->addMenu("帮助");
     QAction *feedbackAction = new QAction("问题反馈", helpMenu);
+
+    Feedback *feedback = new Feedback(this);
+    connect(feedbackAction, &QAction::triggered, feedback, &Feedback::show);
 
     helpMenu->addAction(feedbackAction);
 }

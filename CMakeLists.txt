@@ -17,7 +17,8 @@ add_executable(cake
     candylist.h candylist.cc
     candyitem.h candyitem.cc
     detailarea.h detailarea.cc
-    startoption.h startoption.cpp
+    startoption.h startoption.cc
+    feedback.h feedback.cc
     images.qrc admin.rc
 )
 
