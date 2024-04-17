@@ -84,7 +84,7 @@ void MainWindow::addFileMenu()
     QMenu *fileMenu = menuBar()->addMenu("文件");
     QAction *newAction = new QAction("新建", fileMenu);
     QAction *quitAction = new QAction("退出", fileMenu);
-    connect(newAction, &QAction::triggered, detailArea, &DetailArea::reset);
+    connect(newAction, &QAction::triggered, [&] { detailArea->reset(candyList->count() == 0); });
     connect(quitAction, &QAction::triggered, this, &MainWindow::directQuit);
 
     fileMenu->addAction(newAction);

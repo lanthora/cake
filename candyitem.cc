@@ -5,6 +5,7 @@
 #include <QSettings>
 
 std::thread CandyItem::keepAliveThread;
+std::mutex CandyItem::candyMutex;
 std::queue<std::weak_ptr<void>> CandyItem::candyQueue;
 std::map<void *, std::weak_ptr<void>> CandyItem::candyRawWeakMap;
 volatile bool CandyItem::running;
@@ -24,11 +25,14 @@ CandyItem::CandyItem()
     setSizeHint(QSize(0, 40));
 
     candy = std::shared_ptr<void>(candy_client_create(), candy_client_release);
+
+    std::lock_guard lock(CandyItem::candyMutex);
     CandyItem::candyRawWeakMap[candy.get()] = candy;
 }
 
 CandyItem::~CandyItem()
 {
+    std::lock_guard lock(CandyItem::candyMutex);
     CandyItem::candyRawWeakMap.erase(candy.get());
 }
 
@@ -60,6 +64,7 @@ void CandyItem::update()
 
     candy_client_set_address_update_callback(candy.get(), address_update_callback);
 
+    std::lock_guard lock(CandyItem::candyMutex);
     CandyItem::candyQueue.push(candy);
 }
 
@@ -89,6 +94,7 @@ QString CandyItem::randomHexString(int length)
 
 void candyErrorCallback(void *candy)
 {
+    std::lock_guard lock(CandyItem::candyMutex);
     auto it = CandyItem::candyRawWeakMap.find(candy);
     if (it != CandyItem::candyRawWeakMap.end()) {
         CandyItem::candyQueue.push(it->second);
@@ -100,14 +106,17 @@ void CandyItem::startKeepAlive()
     running = true;
     keepAliveThread = std::thread([&] {
         while (running) {
-            if (!candyQueue.empty()) {
-                auto candy = candyQueue.front().lock();
-                if (candy) {
-                    candy_client_shutdown(candy.get());
-                    candy_client_run(candy.get());
-                }
+            {
+                std::lock_guard lock(candyMutex);
+                if (!candyQueue.empty()) {
+                    auto candy = candyQueue.front().lock();
+                    if (candy) {
+                        candy_client_shutdown(candy.get());
+                        candy_client_run(candy.get());
+                    }
 
-                candyQueue.pop();
+                    candyQueue.pop();
+                }
             }
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }

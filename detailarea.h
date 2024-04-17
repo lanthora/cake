@@ -18,7 +18,7 @@ public:
     explicit DetailArea();
     void setCandyList(CandyList *candyList);
     void selectItem(QListWidgetItem *item);
-    void reset();
+    void reset(bool fillDefault = false);
     void save();
     void remove();
 
