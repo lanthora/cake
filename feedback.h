@@ -2,7 +2,6 @@
 #define FEEDBACK_H
 
 #include <QDialog>
-#include <QLabel>
 #include <QObject>
 
 class Feedback : public QDialog

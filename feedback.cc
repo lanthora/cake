@@ -1,4 +1,5 @@
 #include "feedback.h"
+#include <QLabel>
 #include <QVBoxLayout>
 
 Feedback::Feedback(QWidget *parent)
