@@ -106,18 +106,22 @@ void CandyItem::startKeepAlive()
     running = true;
     keepAliveThread = std::thread([&] {
         while (running) {
+            std::shared_ptr<void> candy;
+
             {
                 std::lock_guard lock(candyMutex);
                 if (!candyQueue.empty()) {
-                    auto candy = candyQueue.front().lock();
-                    if (candy) {
-                        candy_client_shutdown(candy.get());
-                        candy_client_run(candy.get());
-                    }
-
+                    candy = candyQueue.front().lock();
                     candyQueue.pop();
                 }
             }
+
+            if (candy) {
+                candy_client_shutdown(candy.get());
+                candy_client_run(candy.get());
+                candy.reset();
+            }
+
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     });
