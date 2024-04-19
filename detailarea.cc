@@ -136,7 +136,6 @@ void DetailArea::remove()
     removeButton->setEnabled(false);
     int row = candyList->currentRow();
     CandyItem *item = dynamic_cast<CandyItem *>(candyList->takeItem(row));
-    item->shutdown();
     settings.remove(item->text());
     settings.sync();
     delete item;

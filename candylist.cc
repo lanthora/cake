@@ -5,17 +5,6 @@
 
 CandyList::CandyList()
 {
-    candy_init();
-    candy_use_system_time();
-
-    if (QSysInfo::productType() == "windows") {
-        candy_set_log_path("C:/ProgramData/Cake/logs/daily");
-    }
-
-    candy_enable_debug();
-
-    CandyItem::startKeepAlive();
-
     QSettings settings;
     for (const QString &group : settings.childGroups()) {
         CandyItem *item = new CandyItem;
@@ -27,13 +16,8 @@ CandyList::CandyList()
 
 CandyList::~CandyList()
 {
-    CandyItem::stopKeepAlive();
-
     while (count() > 0) {
         CandyItem *item = dynamic_cast<CandyItem *>(takeItem(0));
-        item->shutdown();
         delete item;
     }
-
-    candy_release();
 }

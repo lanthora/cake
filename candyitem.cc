@@ -1,14 +1,9 @@
 #include "candyitem.h"
 #include "candy.h"
+#include "keepalive.h"
 #include <random>
 #include <sstream>
 #include <QSettings>
-
-std::thread CandyItem::keepAliveThread;
-std::mutex CandyItem::candyMutex;
-std::queue<std::weak_ptr<void>> CandyItem::candyQueue;
-std::map<void *, std::weak_ptr<void>> CandyItem::candyRawWeakMap;
-volatile bool CandyItem::running;
 
 void address_update_callback(const char *name, const char *address)
 {
@@ -25,15 +20,13 @@ CandyItem::CandyItem()
     setSizeHint(QSize(0, 40));
 
     candy = std::shared_ptr<void>(candy_client_create(), candy_client_release);
-
-    std::lock_guard lock(CandyItem::candyMutex);
-    CandyItem::candyRawWeakMap[candy.get()] = candy;
+    KeepAlive::instance().add(candy);
 }
 
 CandyItem::~CandyItem()
 {
-    std::lock_guard lock(CandyItem::candyMutex);
-    CandyItem::candyRawWeakMap.erase(candy.get());
+    KeepAlive::instance().del(candy);
+    candy_client_shutdown(candy.get());
 }
 
 void CandyItem::update()
@@ -63,14 +56,7 @@ void CandyItem::update()
     settings.endGroup();
 
     candy_client_set_address_update_callback(candy.get(), address_update_callback);
-
-    std::lock_guard lock(CandyItem::candyMutex);
-    CandyItem::candyQueue.push(candy);
-}
-
-void CandyItem::shutdown()
-{
-    candy_client_shutdown(candy.get());
+    KeepAlive::instance().restart(candy);
 }
 
 int CandyItem::randomHex()
@@ -90,48 +76,4 @@ QString CandyItem::randomHexString(int length)
         out << QString::number(randomHex(), 16);
     }
     return retval;
-}
-
-void candyErrorCallback(void *candy)
-{
-    std::lock_guard lock(CandyItem::candyMutex);
-    auto it = CandyItem::candyRawWeakMap.find(candy);
-    if (it != CandyItem::candyRawWeakMap.end()) {
-        CandyItem::candyQueue.push(it->second);
-    }
-}
-
-void CandyItem::startKeepAlive()
-{
-    running = true;
-    keepAliveThread = std::thread([&] {
-        while (running) {
-            std::shared_ptr<void> candy;
-
-            {
-                std::lock_guard lock(candyMutex);
-                if (!candyQueue.empty()) {
-                    candy = candyQueue.front().lock();
-                    candyQueue.pop();
-                }
-            }
-
-            if (candy) {
-                candy_client_shutdown(candy.get());
-                candy_client_run(candy.get());
-                candy.reset();
-            }
-
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
-    });
-    candy_client_set_error_cb(candyErrorCallback);
-}
-
-void CandyItem::stopKeepAlive()
-{
-    running = false;
-    if (keepAliveThread.joinable()) {
-        keepAliveThread.join();
-    }
 }
