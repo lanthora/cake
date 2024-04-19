@@ -19,6 +19,7 @@ add_executable(cake
     detailarea.h detailarea.cc
     startoption.h startoption.cc
     feedback.h feedback.cc
+    keepalive.h keepalive.cc
     images.qrc admin.rc
 )
 
@@ -33,7 +34,7 @@ include(FetchContent)
 FetchContent_Declare(
     candy
     GIT_REPOSITORY https://github.com/lanthora/candy.git
-    GIT_TAG        3c21271c7889cca3bf19f5fd3b538149d855ecb3
+    GIT_TAG        b0b5726a157fb3611db7ada9a7a4b4ac3388f26a
 )
 set(CANDY_DEVEL "1" CACHE BOOL "" FORCE)
 set(CANDY_NOEXE "1" CACHE BOOL "" FORCE)
