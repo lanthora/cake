@@ -2,11 +2,11 @@
 #define KEEPALIVE_H
 
 #include "candy.h"
+#include <list>
 #include <map>
 #include <memory>
 #include <mutex>
 #include <thread>
-#include <queue>
 
 void candy_error_cb(void *candy);
 
@@ -24,7 +24,7 @@ private:
 
     std::mutex mutex;
     std::thread thread;
-    std::queue<std::weak_ptr<void>> queue;
+    std::list<std::weak_ptr<void>> list;
     std::map<void *, std::weak_ptr<void>> map;
     bool running;
 
