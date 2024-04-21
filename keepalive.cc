@@ -1,5 +1,6 @@
 #include "keepalive.h"
 #include "candy.h"
+#include <algorithm>
 #include <QSysInfo>
 
 KeepAlive &KeepAlive::instance()
@@ -23,7 +24,7 @@ void KeepAlive::del(std::shared_ptr<void> candy)
 void KeepAlive::restart(std::shared_ptr<void> candy)
 {
     std::lock_guard lock(this->mutex);
-    this->queue.push(candy);
+    this->list.push_back(candy);
 }
 
 KeepAlive::KeepAlive()
@@ -46,9 +47,9 @@ KeepAlive::KeepAlive()
             // 列表里取出一个待重启的客户端
             if (running) {
                 std::lock_guard lock(mutex);
-                if (!queue.empty()) {
-                    candy = queue.front().lock();
-                    queue.pop();
+                if (!list.empty()) {
+                    candy = list.front().lock();
+                    list.pop_front();
                 }
             }
 
@@ -89,8 +90,16 @@ void candy_error_cb(void *candy)
 {
     KeepAlive &instance = KeepAlive::instance();
     std::lock_guard lock(instance.mutex);
+
     auto it = instance.map.find(candy);
-    if (it != instance.map.end()) {
-        instance.queue.push(it->second);
+    if (it == instance.map.end()) {
+        return;
     }
+
+    auto equal = [&](std::weak_ptr<void> ptr) { return !ptr.owner_before(it->second) && !it->second.owner_before(ptr); };
+    if (std::find_if(instance.list.begin(), instance.list.end(), equal) != instance.list.end()) {
+        return;
+    }
+
+    instance.list.push_back(it->second);
 }
