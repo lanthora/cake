@@ -34,7 +34,7 @@ include(FetchContent)
 FetchContent_Declare(
     candy
     GIT_REPOSITORY https://github.com/lanthora/candy.git
-    GIT_TAG        b0b5726a157fb3611db7ada9a7a4b4ac3388f26a
+    GIT_TAG        975c10213b83c3940ee4ac0690b984cc7ac0d563
 )
 set(CANDY_DEVEL "1" CACHE BOOL "" FORCE)
 set(CANDY_NOEXE "1" CACHE BOOL "" FORCE)
