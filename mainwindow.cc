@@ -17,10 +17,8 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowTitle("组网工具");
-    setFixedSize(850, 585);
+    setFixedSize(850, 560);
     setWindowIcon(QIcon(":/logo.ico"));
-
-    statusBar()->setSizeGripEnabled(false);
 
     addCentralWidget();
     addFileMenu();
@@ -138,7 +136,7 @@ void MainWindow::addCentralWidget()
     connect(candyList, &QListWidget::itemClicked, detailArea, &DetailArea::selectItem);
 
     // 状态栏显示当前地址
-    connect(detailArea, &DetailArea::updateStatusBar, statusBar(), &QStatusBar::showMessage);
+    connect(detailArea, &DetailArea::updateTitle, this, &MainWindow::setWindowTitle);
 }
 
 void MainWindow::addSystemTray()

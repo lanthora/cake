@@ -23,7 +23,7 @@ public:
     void remove();
 
 signals:
-    void updateStatusBar(const QString &text, int timeout = 0);
+    void updateTitle(const QString &text);
 
 private:
     QWidget *detailWidget = nullptr;

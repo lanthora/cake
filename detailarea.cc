@@ -47,7 +47,7 @@ void DetailArea::selectItem(QListWidgetItem *item)
     discovery->setText(settings.value("discovery").toString());
     route->setText(settings.value("route").toString());
     localhost->setText(settings.value("localhost").toString());
-    updateStatusBar(settings.value("expected").toString());
+    updateTitle(settings.value("expected").toString());
     settings.endGroup();
 
     detailWidget->show();
@@ -80,7 +80,7 @@ void DetailArea::reset(bool fillDefault)
     removeButton->setEnabled(false);
     name->setEnabled(true);
 
-    updateStatusBar("");
+    updateTitle("新增网络");
 
     detailWidget->show();
     return;
