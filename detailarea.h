@@ -22,6 +22,9 @@ public:
     void save();
     void remove();
 
+signals:
+    void updateStatusBar(const QString &text, int timeout = 0);
+
 private:
     QWidget *detailWidget = nullptr;
 
