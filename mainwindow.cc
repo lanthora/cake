@@ -10,14 +10,17 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QStatusBar>
 #include <QWidgetAction>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowTitle("组网工具");
-    setFixedSize(850, 610);
+    setFixedSize(850, 585);
     setWindowIcon(QIcon(":/logo.ico"));
+
+    statusBar()->setSizeGripEnabled(false);
 
     addCentralWidget();
     addFileMenu();
@@ -133,6 +136,9 @@ void MainWindow::addCentralWidget()
 
     // 连接列表的 itemClicked() 信号到详细信息区域的更新函数
     connect(candyList, &QListWidget::itemClicked, detailArea, &DetailArea::selectItem);
+
+    // 状态栏显示当前地址
+    connect(detailArea, &DetailArea::updateStatusBar, statusBar(), &QStatusBar::showMessage);
 }
 
 void MainWindow::addSystemTray()

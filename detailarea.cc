@@ -36,11 +36,9 @@ void DetailArea::selectItem(QListWidgetItem *item)
     candyList->setCurrentItem(item);
     name->setEnabled(false);
     removeButton->setEnabled(true);
-    detailWidget->show();
-
-    name->setText(item->text());
 
     settings.beginGroup(item->text());
+    name->setText(item->text());
     websocket->setText(settings.value("websocket").toString());
     password->setText(settings.value("password").toString());
     tun->setText(settings.value("tun").toString());
@@ -49,8 +47,10 @@ void DetailArea::selectItem(QListWidgetItem *item)
     discovery->setText(settings.value("discovery").toString());
     route->setText(settings.value("route").toString());
     localhost->setText(settings.value("localhost").toString());
-    item->setToolTip(settings.value("expected").toString());
+    updateStatusBar(settings.value("expected").toString());
     settings.endGroup();
+
+    detailWidget->show();
 
     return;
 }
@@ -79,6 +79,8 @@ void DetailArea::reset(bool fillDefault)
     candyList->clearSelection();
     removeButton->setEnabled(false);
     name->setEnabled(true);
+
+    updateStatusBar("");
 
     detailWidget->show();
     return;
@@ -162,7 +164,7 @@ QWidget *DetailArea::createInputWidget(QString key, QLineEdit *input)
     input->setFixedWidth(400);
     layout->addWidget(label, 1);
     layout->addWidget(input, 5);
-    widget->setFixedHeight(50);
+    widget->setFixedHeight(45);
     return widget;
 }
 
