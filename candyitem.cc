@@ -1,8 +1,6 @@
 #include "candyitem.h"
 #include "candy.h"
 #include "keepalive.h"
-#include <random>
-#include <sstream>
 #include <QSettings>
 
 void address_update_callback(const char *name, const char *address)
@@ -35,14 +33,9 @@ void CandyItem::update()
     QSettings settings;
 
     candy_client_set_name(candy.get(), toStdString(text()).c_str());
+    candy_client_set_virtual_mac(candy.get(), toStdString(settings.value("vmac")).c_str());
 
     settings.beginGroup(text());
-
-    if (settings.value("vmac").isNull()) {
-        settings.setValue("vmac", randomHexString(16));
-    }
-
-    candy_client_set_virtual_mac(candy.get(), toStdString(settings.value("vmac")).c_str());
     candy_client_set_password(candy.get(), toStdString(settings.value("password")).c_str());
     candy_client_set_websocket_server(candy.get(), toStdString(settings.value("websocket")).c_str());
     candy_client_set_tun_address(candy.get(), toStdString(settings.value("tun")).c_str());
@@ -57,23 +50,4 @@ void CandyItem::update()
 
     candy_client_set_address_update_callback(candy.get(), address_update_callback);
     KeepAlive::instance().restart(candy);
-}
-
-int CandyItem::randomHex()
-{
-    std::random_device device;
-    std::mt19937 engine(device());
-    std::uniform_int_distribution<int> distrib(0, 15);
-    return distrib(engine);
-}
-
-QString CandyItem::randomHexString(int length)
-{
-    QString retval;
-    QTextStream out(&retval);
-    std::stringstream ss;
-    for (int i = 0; i < length; i++) {
-        out << QString::number(randomHex(), 16);
-    }
-    return retval;
 }

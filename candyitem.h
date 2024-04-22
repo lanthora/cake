@@ -13,8 +13,6 @@ public:
 
 private:
     std::shared_ptr<void> candy;
-    int randomHex();
-    QString randomHexString(int length);
 };
 
 #endif // CANDYITEM_H
