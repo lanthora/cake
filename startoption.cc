@@ -12,6 +12,19 @@ StartOption::StartOption(QWidget *parent)
     setWindowTitle("启动选项");
     setFixedSize(300, 200);
 
+    QPushButton *saveButton = new QPushButton("保存", this);
+    connect(saveButton, &QPushButton::clicked, this, &StartOption::save);
+
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->addWidget(autoStartup, 0, Qt::AlignCenter);
+    layout->addWidget(showMainWindow, 0, Qt::AlignCenter);
+    layout->addWidget(saveButton, 0, Qt::AlignCenter);
+
+    save();
+}
+
+void StartOption::showEvent(QShowEvent *event)
+{
     if (QSysInfo::productType() == "windows") {
         autoStartup->setChecked(settings.value("autostartup", true).toBool());
     } else {
@@ -25,16 +38,6 @@ StartOption::StartOption(QWidget *parent)
         showMainWindow->setChecked(true);
         showMainWindow->setDisabled(true);
     }
-
-    QPushButton *saveButton = new QPushButton("保存", this);
-    connect(saveButton, &QPushButton::clicked, this, &StartOption::save);
-
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->addWidget(autoStartup, 0, Qt::AlignCenter);
-    layout->addWidget(showMainWindow, 0, Qt::AlignCenter);
-    layout->addWidget(saveButton, 0, Qt::AlignCenter);
-
-    save();
 }
 
 void StartOption::save()
