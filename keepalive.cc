@@ -33,7 +33,7 @@ KeepAlive::KeepAlive()
     candy_use_system_time();
 
 #ifdef Q_OS_WIN
-    candy_set_log_path("C:/ProgramData/Cake/logs/daily");
+    candy_set_log_path("C:/ProgramData/Cake/logs/candy.txt");
 #endif
 
     candy_enable_debug();
