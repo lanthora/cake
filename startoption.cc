@@ -37,6 +37,19 @@ StartOption::StartOption(QWidget *parent)
     save();
 }
 
+void StartOption::showEvent(QShowEvent *event)
+{
+    if (QSysInfo::productType() == "windows") {
+        autoStartup->setChecked(settings.value("autostartup", true).toBool());
+    }
+
+    if (QSystemTrayIcon::isSystemTrayAvailable()) {
+        showMainWindow->setChecked(settings.value("showmainwindow", true).toBool());
+    }
+
+    QWidget::showEvent(event);
+}
+
 void StartOption::save()
 {
     if (QSysInfo::productType() == "windows") {
@@ -58,5 +71,5 @@ void StartOption::save()
         settings.setValue("showmainwindow", showMainWindow->isChecked());
     }
 
-    hide();
+    close();
 }
