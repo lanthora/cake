@@ -1,5 +1,5 @@
 #define MyAppName "Cake"
-#define MyAppVersion "5.5-8"
+#define MyAppVersion "5.6-1"
 #define MyAppPublisher "lanthora"
 #define MyAppURL "https://github.com/lanthora/cake"
 #define MyAppExeName "cake.exe"
