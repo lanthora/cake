@@ -18,6 +18,7 @@ protected:
 private:
     QCheckBox *autoStartup = new QCheckBox("开机自启动", this);
     QCheckBox *showMainWindow = new QCheckBox("显示主界面", this);
+    QCheckBox *updateCheck = new QCheckBox("检查更新", this);
     QSettings settings;
     void save();
 };

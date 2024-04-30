@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "feedback.h"
 #include "startoption.h"
+#include "update.h"
 #include <QApplication>
 #include <QGraphicsDropShadowEffect>
 #include <QHBoxLayout>
@@ -30,6 +31,13 @@ MainWindow::MainWindow(QWidget *parent)
     if (settings.value("showmainwindow", true).toBool()) {
         show();
     }
+
+    Update *update = new Update(this);
+    connect(update, &Update::notify, [&](QString current, QString latest) {
+        if (this->trayIcon) {
+            this->trayIcon->showMessage("更新提示", QString("检查到新版本: " + latest + ", 请及时更新"));
+        }
+    });
 }
 
 MainWindow::~MainWindow() {}
@@ -141,7 +149,7 @@ void MainWindow::addCentralWidget()
 
 void MainWindow::addSystemTray()
 {
-    // 通过系统托盘退出
+    // 添加系统托盘
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
         QMenu *trayMenu = new QMenu(this);
         QIcon quitIcon = QApplication::style()->standardIcon(QStyle::SP_TabCloseButton);
