@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 
 project(cake LANGUAGES CXX)
 
+set (CANDY_VERSION "5.7")
+set (CAKE_RELEASE "1")
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -9,7 +12,11 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core)
+set (CAKE_VERSION "${CANDY_VERSION}-${CAKE_RELEASE}") 
+configure_file("setup.iss.in" "setup.iss" @ONLY)
+add_compile_definitions(CAKE_VERSION="${CAKE_VERSION}")
+
+find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core Network)
 
 add_executable(cake
     main.cc
@@ -20,21 +27,29 @@ add_executable(cake
     startoption.h startoption.cc
     feedback.h feedback.cc
     keepalive.h keepalive.cc
+    update.h update.cc
     images.qrc admin.rc
 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Gui Qt6::Core)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Gui Qt6::Core Qt6::Network)
 
-set_target_properties(cake PROPERTIES
-    ${BUNDLE_ID_OPTION}
-    WIN32_EXECUTABLE TRUE
-)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set_target_properties(cake PROPERTIES
+        ${BUNDLE_ID_OPTION}
+        WIN32_EXECUTABLE FALSE
+    )
+else()
+    set_target_properties(cake PROPERTIES
+        ${BUNDLE_ID_OPTION}
+        WIN32_EXECUTABLE TRUE
+    )
+endif()
 
 include(FetchContent)
 FetchContent_Declare(
     candy
     GIT_REPOSITORY https://github.com/lanthora/candy.git
-    GIT_TAG        2b33ab88f4eb95d2d9bb307a105d3059f1ecfc6b
+    GIT_TAG        "v${CANDY_VERSION}"
 )
 set(CANDY_DEVEL "1" CACHE BOOL "" FORCE)
 set(CANDY_NOEXE "1" CACHE BOOL "" FORCE)
@@ -47,8 +62,4 @@ include_directories(${candy_SOURCE_DIR}/src/cffi/)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE libcandy)
 
 include(GNUInstallDirs)
-install(TARGETS cake
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
+install(TARGETS cake)

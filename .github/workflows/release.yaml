@@ -33,29 +33,32 @@ jobs:
         key: ${{ hashFiles('CMakeLists.txt') }}
     - name: build
       shell: msys2 {0}
-      run: cmake -B .Release -DCMAKE_BUILD_TYPE=Release && cmake --build .Release
+      run: |
+        cmake -B .Release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=".Release" -DCMAKE_INSTALL_BINDIR="artifacts"
+        cmake --build .Release
+        cmake --install .Release
     - name: collect
       shell: msys2 {0}
       run: |
-        ./winqtcollect.sh .Release/cake.exe artifacts
-        cp logo.ico artifacts
-        cp .Release/_deps/candy-build/src/tun/wintun/bin/amd64/wintun.dll artifacts
+        ./winqtcollect.sh .Release/artifacts/cake.exe .Release/artifacts
+        cp logo.ico .Release
+        cp .Release/_deps/candy-build/src/tun/wintun/bin/amd64/wintun.dll .Release/artifacts
     - name: installer
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
       with:
-        path: setup.iss
+        path: .Release/setup.iss
     - name: upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: cake-portable
-        path: artifacts
+        path: .Release/artifacts
     - name: upload installer
       uses: actions/upload-artifact@v4
       with:
         name: cake-installer
-        path: installer
+        path: .Release/installer
     - name: release
       uses: softprops/action-gh-release@v2
       if: github.event_name == 'release'
       with:
-        files: installer/*.exe
+        files: .Release/installer/*.exe

@@ -12,6 +12,10 @@ StartOption::StartOption(QWidget *parent)
     setWindowTitle("启动选项");
     setFixedSize(300, 200);
 
+    autoStartup->setFixedWidth(100);
+    showMainWindow->setFixedWidth(100);
+    updateCheck->setFixedWidth(100);
+
     if (QSysInfo::productType() == "windows") {
         autoStartup->setChecked(settings.value("autostartup", true).toBool());
     } else {
@@ -26,12 +30,15 @@ StartOption::StartOption(QWidget *parent)
         showMainWindow->setDisabled(true);
     }
 
+    updateCheck->setChecked(settings.value("updatecheck", true).toBool());
+
     QPushButton *saveButton = new QPushButton("保存", this);
     connect(saveButton, &QPushButton::clicked, this, &StartOption::save);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(autoStartup, 0, Qt::AlignCenter);
     layout->addWidget(showMainWindow, 0, Qt::AlignCenter);
+    layout->addWidget(updateCheck, 0, Qt::AlignCenter);
     layout->addWidget(saveButton, 0, Qt::AlignCenter);
 
     save();
@@ -70,6 +77,8 @@ void StartOption::save()
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
         settings.setValue("showmainwindow", showMainWindow->isChecked());
     }
+
+    settings.setValue("updatecheck", updateCheck->isChecked());
 
     close();
 }

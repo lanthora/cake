@@ -47,7 +47,7 @@ fi
 exe=$(readlink -f "$1")
 
 # Copy the executable file to the target directory
-cp "$exe" "$2"
+cp -n "$exe" "$2"
 exe=$2/$(basename "$exe")
 exe=$(readlink -f "$exe")
 
