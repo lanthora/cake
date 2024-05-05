@@ -33,16 +33,15 @@ add_executable(cake
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Gui Qt6::Core Qt6::Network)
 
+set_target_properties(cake PROPERTIES
+    QT_TARGET_DESCRIPTION "Cake"
+    MACOSX_BUNDLE TRUE
+)
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set_target_properties(cake PROPERTIES
-        ${BUNDLE_ID_OPTION}
-        WIN32_EXECUTABLE FALSE
-    )
+    set_target_properties(cake PROPERTIES WIN32_EXECUTABLE FALSE)
 else()
-    set_target_properties(cake PROPERTIES
-        ${BUNDLE_ID_OPTION}
-        WIN32_EXECUTABLE TRUE
-    )
+    set_target_properties(cake PROPERTIES WIN32_EXECUTABLE TRUE)
 endif()
 
 include(FetchContent)
@@ -62,4 +61,6 @@ include_directories(${candy_SOURCE_DIR}/src/cffi/)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE libcandy)
 
 include(GNUInstallDirs)
-install(TARGETS cake)
+install(TARGETS cake
+    BUNDLE DESTINATION .
+)
