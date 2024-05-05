@@ -6,6 +6,7 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication::setOrganizationName("canets");
+    QCoreApplication::setOrganizationDomain("canets.org");
     QCoreApplication::setApplicationName("cake");
 
     QApplication a(argc, argv);
