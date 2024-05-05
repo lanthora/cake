@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowTitle("组网工具");
-    setFixedSize(850, 560);
+    setFixedSize(850, 570);
     setWindowIcon(QIcon(":/logo.ico"));
 
     addCentralWidget();

@@ -45,7 +45,6 @@ void CandyItem::update()
     candy_client_set_route_cost(candy.get(), settings.value("route").toInt());
     candy_client_set_udp_bind_port(candy.get(), settings.value("port").toInt());
     candy_client_set_localhost(candy.get(), toStdString(settings.value("localhost")).c_str());
-
     settings.endGroup();
 
     candy_client_set_address_update_callback(candy.get(), address_update_callback);
