@@ -8,6 +8,7 @@
 CandyList::CandyList()
 {
     QSettings settings;
+    settings.setFallbacksEnabled(false);
 
     if (settings.value("vmac").isNull()) {
         settings.setValue("vmac", randomHexString(16));
