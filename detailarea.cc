@@ -138,9 +138,11 @@ void DetailArea::remove()
     removeButton->setEnabled(false);
     int row = candyList->currentRow();
     CandyItem *item = dynamic_cast<CandyItem *>(candyList->takeItem(row));
-    settings.remove(item->text());
-    settings.sync();
+    QString name = item->text();
     delete item;
+
+    settings.remove(name);
+    settings.sync();
 
     if (candyList->count() == 0) {
         reset();

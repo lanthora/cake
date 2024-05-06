@@ -18,6 +18,7 @@ CandyItem::CandyItem()
     setSizeHint(QSize(0, 40));
 
     candy = std::shared_ptr<void>(candy_client_create(), candy_client_release);
+    candy_client_set_address_update_callback(candy.get(), address_update_callback);
     KeepAlive::instance().add(candy);
 }
 
@@ -47,6 +48,5 @@ void CandyItem::update()
     candy_client_set_localhost(candy.get(), toStdString(settings.value("localhost")).c_str());
     settings.endGroup();
 
-    candy_client_set_address_update_callback(candy.get(), address_update_callback);
     KeepAlive::instance().restart(candy);
 }
