@@ -37,7 +37,7 @@ jobs:
     - name: cache
       uses: actions/cache@v4
       with:
-        path: .Release/_deps
+        path: .Release
         key: ${{ hashFiles('CMakeLists.txt') }}
     - name: build
       shell: msys2 {0}
