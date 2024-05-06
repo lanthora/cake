@@ -34,11 +34,6 @@ jobs:
           mingw-w64-x86_64-qt6-base
     - name: checkout
       uses: actions/checkout@v4
-    - name: cache
-      uses: actions/cache@v4
-      with:
-        path: .Release
-        key: ${{ hashFiles('CMakeLists.txt') }}
     - name: build
       shell: msys2 {0}
       run: |
