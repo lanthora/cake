@@ -35,7 +35,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Gui Qt6::C
 
 set_target_properties(cake PROPERTIES
     QT_TARGET_DESCRIPTION "Cake"
-    MACOSX_BUNDLE TRUE
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
