@@ -10,7 +10,7 @@ StartOption::StartOption(QWidget *parent)
     : QDialog(parent)
 {
     setWindowTitle("启动选项");
-    setFixedSize(300, 200);
+    setFixedSize(500, 300);
 
     autoStartup->setFixedWidth(100);
     showMainWindow->setFixedWidth(100);

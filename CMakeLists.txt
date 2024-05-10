@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 project(cake LANGUAGES CXX)
 
 set (CANDY_VERSION "5.8")
-set (CAKE_RELEASE "2")
+set (CAKE_RELEASE "3")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -19,7 +19,7 @@ add_compile_definitions(CAKE_VERSION="${CAKE_VERSION}")
 find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core Network)
 
 add_executable(cake
-    main.cc
+    define.h main.cc
     mainwindow.h mainwindow.cc
     candylist.h candylist.cc
     candyitem.h candyitem.cc
@@ -28,6 +28,7 @@ add_executable(cake
     feedback.h feedback.cc
     keepalive.h keepalive.cc
     update.h update.cc
+    about.h about.cc
     images.qrc admin.rc
 )
 
