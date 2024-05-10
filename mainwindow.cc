@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "about.h"
 #include "feedback.h"
 #include "startoption.h"
 #include "update.h"
@@ -94,7 +95,12 @@ void MainWindow::addFileMenu()
     QAction *newAction = new QAction("新建", fileMenu);
     QAction *quitAction = new QAction("退出", fileMenu);
     connect(newAction, &QAction::triggered, [&] { detailArea->reset(candyList->count() == 0); });
-    connect(quitAction, &QAction::triggered, this, &MainWindow::directQuit);
+    connect(quitAction, &QAction::triggered, [&] {
+        // 新建的时候可能会误触退出,再确认一次
+        if (QMessageBox::question(this, "退出", "退出后将断开所有虚拟网络连接,确认退出?") == QMessageBox::Yes) {
+            directQuit();
+        }
+    });
 
     fileMenu->addAction(newAction);
     fileMenu->addAction(quitAction);
@@ -114,12 +120,18 @@ void MainWindow::addEditMenu()
 void MainWindow::addHelpMenu()
 {
     QMenu *helpMenu = menuBar()->addMenu("帮助");
-    QAction *feedbackAction = new QAction("问题反馈", helpMenu);
 
+    QAction *feedbackAction = new QAction("问题反馈", helpMenu);
     Feedback *feedback = new Feedback(this);
+
+    QAction *aboutAction = new QAction("关于", helpMenu);
+    About *about = new About(this);
+
     connect(feedbackAction, &QAction::triggered, feedback, &Feedback::show);
+    connect(aboutAction, &QAction::triggered, about, &About::show);
 
     helpMenu->addAction(feedbackAction);
+    helpMenu->addAction(aboutAction);
 }
 
 void MainWindow::addCentralWidget()

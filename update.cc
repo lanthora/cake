@@ -1,14 +1,11 @@
 #include "update.h"
+#include "define.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QSettings>
 #include <QString>
-
-#ifndef CAKE_VERSION
-#define CAKE_VERSION "Unknown"
-#endif
 
 Update::Update(QObject *parent)
     : QObject(parent)
