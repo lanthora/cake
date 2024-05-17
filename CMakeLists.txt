@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(cake LANGUAGES CXX)
 
-set (CANDY_VERSION "5.8.4")
+set (CANDY_VERSION "5.8.5")
 set (CAKE_RELEASE "1")
 
 set(CMAKE_AUTOUIC ON)
@@ -61,6 +61,4 @@ include_directories(${candy_SOURCE_DIR}/src/cffi/)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE libcandy)
 
 include(GNUInstallDirs)
-install(TARGETS cake
-    BUNDLE DESTINATION .
-)
+install(TARGETS cake)
