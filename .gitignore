@@ -60,10 +60,6 @@ CMakeLists.txt.user*
 *.vcxproj
 *vcxproj.*
 
-# MinGW generated files
-*.Debug
-*.Release
-
 # Python byte code
 *.pyc
 
@@ -71,4 +67,9 @@ CMakeLists.txt.user*
 # --------
 *.dll
 *.exe
+
+# Build
+build
+target
+installer
 
