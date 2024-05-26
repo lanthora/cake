@@ -22,7 +22,6 @@ jobs:
       uses: msys2/setup-msys2@v2
       with:
         msystem: MINGW64
-        update: true
         install: >-
           mingw-w64-x86_64-cmake
           mingw-w64-x86_64-ninja
@@ -34,29 +33,35 @@ jobs:
           mingw-w64-x86_64-qt6-base
     - name: checkout
       uses: actions/checkout@v4
+    - name: cache
+      uses: actions/cache@v4
+      with:
+        path: build
+        key: ${{ hashFiles('CMakeLists.txt') }}
     - name: build
       shell: msys2 {0}
       run: |
-        cmake -B .Release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=".Release" -DCMAKE_INSTALL_BINDIR="artifacts"
-        cmake --build .Release
-        cmake --install .Release
+        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="target" -DCMAKE_INSTALL_BINDIR="artifacts"
+        cmake --build build
+        cmake --install build
     - name: collect
       shell: msys2 {0}
       run: |
-        ./winqtcollect.sh .Release/artifacts/cake.exe .Release/artifacts
-        cp logo.ico .Release
-        cp .Release/_deps/candy-build/src/tun/wintun/bin/amd64/wintun.dll .Release/artifacts
+        ./winqtcollect.sh target/artifacts/cake.exe target/artifacts
+        cp build/_deps/candy-build/src/tun/wintun/bin/amd64/wintun.dll target/artifacts
+        cp logo.ico target
+        cp build/setup.iss target
     - name: upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: cake-portable
-        path: .Release/artifacts
+        path: target/artifacts
     - name: installer
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
       with:
-        path: .Release/setup.iss
+        path: target/setup.iss
     - name: upload installer
       uses: actions/upload-artifact@v4
       with:
         name: cake-installer
-        path: .Release/installer
+        path: target/installer

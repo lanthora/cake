@@ -3,7 +3,7 @@
 #define MyAppPublisher "lanthora"
 #define MyAppURL "https://github.com/lanthora/cake"
 #define MyAppExeName "cake.exe"
-#define MyAppBuildDir "artifacts"
+#define MyAppArtifactsDir "artifacts"
 #define MyAppOutputDir "installer"
 #define MyAppLogo "logo.ico"
 
@@ -33,7 +33,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "{#MyAppBuildDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#MyAppArtifactsDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#MyAppLogo}"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
