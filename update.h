@@ -3,6 +3,7 @@
 
 #include <QNetworkAccessManager>
 #include <QObject>
+#include <QTimer>
 
 class Update : public QObject
 {
@@ -20,6 +21,7 @@ public slots:
 
 private:
     QNetworkAccessManager *manager;
+    QTimer *timer;
 };
 
 #endif // UPDATE_H

@@ -13,16 +13,20 @@ Update::Update(QObject *parent)
     manager = new QNetworkAccessManager(this);
     connect(manager, &QNetworkAccessManager::finished, this, &Update::handleReply);
 
-    // 启动时以静默模式检查更新,除非有可用升级,否则不显示任何信息
-    QSettings settings;
-    if (settings.value("updatecheck", true).toBool()) {
-        check();
-    }
+    timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, [&] { check(); });
+    timer->setInterval(10000);
+    timer->start();
 }
 
 void Update::check()
 {
-    manager->get(QNetworkRequest(QUrl("https://api.github.com/repos/lanthora/cake/releases/latest")));
+    QSettings settings;
+    if (settings.value("updatecheck", true).toBool()) {
+        manager->get(QNetworkRequest(QUrl("https://api.github.com/repos/lanthora/cake/releases/latest")));
+    } else {
+        timer->stop();
+    }
 }
 
 void Update::handleReply(QNetworkReply *reply)
@@ -42,9 +46,11 @@ void Update::handleReply(QNetworkReply *reply)
         if (version.isEmpty()) {
             return;
         }
-
-        if (QString(version) != QString(CAKE_VERSION)) {
-            notify(QString(CAKE_VERSION), QString(version));
+        if (timer->isActive()) {
+            timer->stop();
+            if (QString(version) != QString(CAKE_VERSION)) {
+                notify(QString(CAKE_VERSION), QString(version));
+            }
         }
     }
 
