@@ -1,5 +1,5 @@
 #include "update.h"
-#include "define.h"
+#include <algorithm>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkReply>
@@ -15,7 +15,7 @@ Update::Update(QObject *parent)
 
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, [&] { check(); });
-    timer->setInterval(10000);
+    timer->setInterval(INTERVAL_INIT);
     timer->start();
 }
 
@@ -31,28 +31,47 @@ void Update::check()
 
 void Update::handleReply(QNetworkReply *reply)
 {
-    if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 200) {
-        QByteArray response = reply->readAll();
-
-        QString version = [&] {
-            QJsonDocument doc = QJsonDocument::fromJson(response);
-            if (doc.isObject()) {
-                QJsonObject obj = doc.object();
-                return obj["tag_name"].toString();
-            }
-            return QString();
-        }();
-
-        if (version.isEmpty()) {
-            return;
-        }
-        if (timer->isActive()) {
-            timer->stop();
-            if (QString(version) != QString(CAKE_VERSION)) {
-                notify(QString(CAKE_VERSION), QString(version));
-            }
-        }
+    if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200) {
+        updateTimer();
+        reply->deleteLater();
+        return;
     }
 
+    QByteArray response = reply->readAll();
+    QString latestVersion = [&] {
+        QJsonDocument doc = QJsonDocument::fromJson(response);
+        if (doc.isObject()) {
+            QJsonObject obj = doc.object();
+            return obj["tag_name"].toString();
+        }
+        return QString();
+    }();
+
+    if (latestVersion.isEmpty()) {
+        updateTimer();
+        reply->deleteLater();
+        return;
+    }
+
+    if (QString(latestVersion) != this->notifiedVersion) {
+        this->notifiedVersion = QString(latestVersion);
+        notify(QString(CAKE_VERSION), QString(latestVersion));
+    }
+
+    updateTimer(INTERVAL_ONEDAY);
     reply->deleteLater();
+}
+
+void Update::updateTimer(int interval)
+{
+    if (interval) {
+        timer->setInterval(interval);
+        return;
+    }
+    if (timer->interval() == INTERVAL_ONEDAY) {
+        timer->setInterval(INTERVAL_INIT);
+        return;
+    }
+    timer->setInterval(std::min(timer->interval() * 2, INTERVAL_LIMIT));
+    return;
 }

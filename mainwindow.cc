@@ -37,9 +37,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(update, &Update::notify, [&](QString current, QString latest) {
         if (this->trayIcon) {
             this->trayIcon->showMessage("更新提示", QString("检查到新版本: " + latest + ", 请及时更新"));
-        } else {
-            QMessageBox::information(this, "更新提示", QString("检查到新版本: " + latest + ", 请及时更新"));
         }
+        QMessageBox::information(this, "更新提示", QString("检查到新版本: " + latest + ", 请及时更新"));
+        showNormal();
     });
 }
 
