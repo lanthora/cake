@@ -4,6 +4,7 @@
 #include "startoption.h"
 #include "update.h"
 #include <QApplication>
+#include <QDesktopServices>
 #include <QGraphicsDropShadowEffect>
 #include <QHBoxLayout>
 #include <QIcon>
@@ -35,11 +36,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     Update *update = new Update(this);
     connect(update, &Update::notify, [&](QString current, QString latest) {
-        if (this->trayIcon) {
-            this->trayIcon->showMessage("更新提示", QString("检查到新版本: " + latest + ", 请及时更新"));
+        show();
+        if (QMessageBox::question(this, "更新提示", QString("检查到新版本: " + latest + ", 请及时更新")) == QMessageBox::Yes) {
+            QDesktopServices::openUrl(QUrl("https://github.com/lanthora/cake/releases/latest"));
         }
-        QMessageBox::information(this, "更新提示", QString("检查到新版本: " + latest + ", 请及时更新"));
-        showNormal();
     });
 }
 
