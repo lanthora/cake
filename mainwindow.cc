@@ -75,13 +75,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::onSystemTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
-    // 左键点击托盘图标隐藏或恢复主窗口
+    // 左键点击托盘显示主窗口
     if (reason == QSystemTrayIcon::Trigger) {
-        if (isVisible() && !isMinimized()) {
-            hide();
-        } else {
-            showNormal();
-        }
+        showNormal();
+        activateWindow();
     }
 }
 
