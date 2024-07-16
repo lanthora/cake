@@ -37,7 +37,7 @@ jobs:
     - name: collect
       shell: msys2 {0}
       run: |
-        ./winqtcollect.sh target/artifacts/cake.exe target/artifacts
+        windeployqt6 target/artifacts/cake.exe
         cp build/_deps/candy-build/src/tun/wintun/bin/amd64/wintun.dll target/artifacts
         cp logo.ico target
         cp build/setup.iss target
