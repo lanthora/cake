@@ -68,8 +68,8 @@ void DetailArea::reset(bool fillDefault)
     localhost->setText("");
 
     if (fillDefault) {
-        name->setText("demo");
-        websocket->setText("wss://canets.org/demo");
+        name->setText("candy");
+        websocket->setText("wss://canets.org");
         stun->setText("stun://stun.canets.org");
         discovery->setText("300");
         route->setText("5");
