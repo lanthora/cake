@@ -44,33 +44,22 @@ KeepAlive::KeepAlive()
             std::shared_ptr<void> candy;
             std::this_thread::sleep_for(std::chrono::seconds(1));
 
-            // 列表里取出一个待重启的客户端
             if (running) {
                 std::lock_guard lock(mutex);
-                if (!list.empty()) {
-                    candy = list.front().lock();
-                    list.pop_front();
+                if (list.empty()) {
+                    continue;
                 }
+                candy = list.front().lock();
+                list.pop_front();
             }
 
-            // 重启客户端过程中不能加锁,否则调用 candy_error_cb 时会产生死锁
-            if (candy) {
+            if (candy.use_count() > 1) {
                 candy_client_shutdown(candy.get());
                 candy_client_run(candy.get());
             }
 
-            // 重启过程中,可能存在上层释放了 candy 的可能,如果上层还持有共享指针,就释放这个共享指针
-            if (candy) {
-                std::lock_guard lock(mutex);
-                if (this->map.find(candy.get()) != this->map.end()) {
-                    candy.reset();
-                }
-            }
-
-            // 上一步没有释放掉共享指针,意味着这是最后一个持有指针的对象,应该关闭客户端,并释放内存
-            if (candy) {
+            if (candy.use_count() == 1) {
                 candy_client_shutdown(candy.get());
-                candy.reset();
             }
         }
     });
