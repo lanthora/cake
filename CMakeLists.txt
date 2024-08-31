@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.28)
 
 project(cake LANGUAGES CXX)
 
-set (CANDY_VERSION "5.10.2")
-set (CAKE_RELEASE "2")
+set (CANDY_VERSION "5.10.3")
+set (CAKE_RELEASE "1")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)

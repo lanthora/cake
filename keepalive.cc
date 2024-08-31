@@ -30,7 +30,6 @@ void KeepAlive::restart(std::shared_ptr<void> candy)
 KeepAlive::KeepAlive()
 {
     candy_init();
-    candy_use_system_time();
 
 #ifdef Q_OS_WIN
     candy_set_log_path("C:/ProgramData/Cake/logs/candy.txt");
