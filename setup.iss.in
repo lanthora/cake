@@ -17,14 +17,15 @@ AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName=C:\Program Files\{#MyAppName}
-DisableProgramGroupPage=yes
 OutputDir={#MyAppOutputDir}
 OutputBaseFilename={#MyAppName}-{#MyAppVersion}
 SetupIconFile={#MyAppLogo}
+DisableProgramGroupPage=yes
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=admin
+DisableFinishedPage=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
