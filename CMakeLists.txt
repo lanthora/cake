@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 
 project(cake LANGUAGES CXX)
 
-set (CANDY_VERSION "5.10.4")
+set (CANDY_VERSION "5.10.6")
 set (CAKE_RELEASE "1")
 
 set(CMAKE_AUTOUIC ON)
@@ -48,13 +48,13 @@ include(FetchContent)
 FetchContent_Declare(
     candy
     GIT_REPOSITORY https://github.com/lanthora/candy.git
-    GIT_TAG        "v${CANDY_VERSION}"
+    GIT_TAG        "8ddca57ee8b10bdb14f2834910421e825b61d5bb"
     EXCLUDE_FROM_ALL
 )
 set(CANDY_DEVEL "1" CACHE BOOL "" FORCE)
 set(CANDY_NOEXE "1" CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(candy)
-include_directories(${candy_SOURCE_DIR}/src/cffi/)
+include_directories(${candy_SOURCE_DIR}/src/ffi/)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE libcandy)
 
 include(GNUInstallDirs)
