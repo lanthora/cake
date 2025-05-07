@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 
 project(cake LANGUAGES CXX)
 
-set (CANDY_VERSION "5.10.4")
+set (CANDY_VERSION "6.0.0")
 set (CAKE_RELEASE "1")
 
 set(CMAKE_AUTOUIC ON)
@@ -54,7 +54,7 @@ FetchContent_Declare(
 set(CANDY_DEVEL "1" CACHE BOOL "" FORCE)
 set(CANDY_NOEXE "1" CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(candy)
-include_directories(${candy_SOURCE_DIR}/src/cffi/)
+include_directories(${candy_SOURCE_DIR}/src/ffi/)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE libcandy)
 
 include(GNUInstallDirs)
