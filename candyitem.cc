@@ -18,7 +18,7 @@ CandyItem::CandyItem()
     setSizeHint(QSize(0, 40));
 
     candy = std::shared_ptr<void>(candy_client_create(), candy_client_release);
-    candy_client_set_address_update_callback(candy.get(), address_update_callback);
+    candy_client_set_tun_update_callback(candy.get(), address_update_callback);
     KeepAlive::instance().add(candy);
 }
 
@@ -38,13 +38,13 @@ void CandyItem::update()
 
     settings.beginGroup(text());
     candy_client_set_password(candy.get(), toStdString(settings.value("password")).c_str());
-    candy_client_set_websocket_server(candy.get(), toStdString(settings.value("websocket")).c_str());
+    candy_client_set_websocket(candy.get(), toStdString(settings.value("websocket")).c_str());
     candy_client_set_tun_address(candy.get(), toStdString(settings.value("tun")).c_str());
-    candy_client_set_expected_address(candy.get(), toStdString(settings.value("expected")).c_str());
+    candy_client_set_expt_tun_address(candy.get(), toStdString(settings.value("expected")).c_str());
     candy_client_set_stun(candy.get(), toStdString(settings.value("stun")).c_str());
     candy_client_set_discovery_interval(candy.get(), settings.value("discovery").toInt());
     candy_client_set_route_cost(candy.get(), settings.value("route").toInt());
-    candy_client_set_udp_bind_port(candy.get(), settings.value("port").toInt());
+    candy_client_set_port(candy.get(), settings.value("port").toInt());
     candy_client_set_localhost(candy.get(), toStdString(settings.value("localhost")).c_str());
     settings.endGroup();
 
