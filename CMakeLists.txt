@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 
 project(cake LANGUAGES CXX)
 
-set (CANDY_VERSION "6.0.1")
+set (CANDY_VERSION "6.0.2")
 set (CAKE_RELEASE "1")
 
 set(CMAKE_AUTOUIC ON)
@@ -36,13 +36,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Gui Qt6::C
 
 set_target_properties(cake PROPERTIES
     QT_TARGET_DESCRIPTION "Cake"
+    WIN32_EXECUTABLE TRUE
 )
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set_target_properties(cake PROPERTIES WIN32_EXECUTABLE FALSE)
-else()
-    set_target_properties(cake PROPERTIES WIN32_EXECUTABLE TRUE)
-endif()
 
 include(FetchContent)
 FetchContent_Declare(
