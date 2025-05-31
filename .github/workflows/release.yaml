@@ -27,7 +27,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: build
-        key: ${{ hashFiles('CMakeLists.txt','.github/workflows/release.yaml') }}
+        key: ${{ hashFiles('CMakeLists.txt') }}
     - name: build
       shell: msys2 {0}
       run: |
