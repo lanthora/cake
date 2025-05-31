@@ -93,6 +93,8 @@ void MainWindow::addFileMenu()
     QMenu *fileMenu = menuBar()->addMenu("文件");
     QAction *newAction = new QAction("新建", fileMenu);
     QAction *quitAction = new QAction("退出", fileMenu);
+    newAction->setIconVisibleInMenu(false);
+    quitAction->setIconVisibleInMenu(false);
     connect(newAction, &QAction::triggered, [&] { detailArea->reset(candyList->count() == 0); });
     connect(quitAction, &QAction::triggered, [&] {
         // 新建的时候可能会误触退出,再确认一次
@@ -109,7 +111,7 @@ void MainWindow::addEditMenu()
 {
     QMenu *settingMenu = menuBar()->addMenu("编辑");
     QAction *autoStartAction = new QAction("启动选项", settingMenu);
-
+    autoStartAction->setIconVisibleInMenu(false);
     StartOption *startOption = new StartOption(this);
     connect(autoStartAction, &QAction::triggered, startOption, &StartOption::show);
 
@@ -121,9 +123,11 @@ void MainWindow::addHelpMenu()
     QMenu *helpMenu = menuBar()->addMenu("帮助");
 
     QAction *feedbackAction = new QAction("问题反馈", helpMenu);
+    feedbackAction->setIconVisibleInMenu(false);
     Feedback *feedback = new Feedback(this);
 
     QAction *aboutAction = new QAction("关于", helpMenu);
+    aboutAction->setIconVisibleInMenu(false);
     About *about = new About(this);
 
     connect(feedbackAction, &QAction::triggered, feedback, &Feedback::show);
