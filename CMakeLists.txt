@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.28)
 project(cake LANGUAGES CXX)
 
 set (CANDY_VERSION "6.0.4")
-set (CAKE_RELEASE "1")
+set (CAKE_RELEASE "4")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -43,7 +43,7 @@ include(FetchContent)
 FetchContent_Declare(
     candy
     GIT_REPOSITORY https://github.com/lanthora/candy.git
-    GIT_TAG        "v${CANDY_VERSION}"
+    GIT_TAG        "7e5c45f546b01282adc3506128bbd274344dabad"
     EXCLUDE_FROM_ALL
 )
 set(CANDY_DEVEL "1" CACHE BOOL "" FORCE)
