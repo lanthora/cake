@@ -3,6 +3,11 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QSharedMemory>
+#include <spdlog/spdlog.h>
+
+#ifdef Q_OS_WIN
+#include <spdlog/sinks/rotating_file_sink.h>
+#endif
 
 #ifdef Q_OS_WIN
 void configureWerDumpSettings()
@@ -35,6 +40,17 @@ int main(int argc, char *argv[])
         return 0;
     }
     shared.create(1);
+
+    spdlog::set_level(spdlog::level::debug);
+
+#ifdef Q_OS_WIN
+    QDir().mkpath("C:/ProgramData/Cake/logs");
+    auto max_size = 1048576 * 5;
+    auto max_files = 3;
+    auto logger = spdlog::rotating_logger_mt("candy", "C:/ProgramData/Cake/logs/candy.txt", max_size, max_files, true);
+    spdlog::set_default_logger(logger);
+    spdlog::flush_every(std::chrono::seconds(1));
+#endif
 
     MainWindow w;
     return a.exec();

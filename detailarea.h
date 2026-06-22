@@ -9,9 +9,11 @@
 #include <QPushButton>
 #include <QScrollArea>
 #include <QSettings>
+#include <QStackedWidget>
 #include <QVBoxLayout>
 
 class CandyItem;
+class QTimer;
 
 class DetailArea : public QFrame
 {
@@ -32,6 +34,8 @@ signals:
 
 private:
     QComboBox *selector;
+    QLineEdit *newName;
+    QStackedWidget *networkStack;
     QScrollArea *scrollArea;
     QWidget *detailWidget;
 
@@ -46,12 +50,20 @@ private:
     QLineEdit *mtu;
     QPushButton *removeButton;
     QPushButton *saveButton;
+    QPushButton *cancelButton;
 
     QMap<QString, CandyItem *> items;
 
     QWidget *createInputRow(const QString &label, QWidget *input);
     QWidget *createButtonRow();
 
+    QString lastSelected;
+    QTimer *statusTimer;
+
+private slots:
+    void pollStatus();
+
+private:
     QSettings settings;
 };
 

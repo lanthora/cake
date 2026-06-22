@@ -30,6 +30,7 @@ StartOption::StartOption(QWidget *parent)
     updateCheck->setChecked(settings.value("updatecheck", true).toBool());
 
     QPushButton *saveButton = new QPushButton("Save", this);
+    saveButton->setMaximumWidth(120);
     connect(saveButton, &QPushButton::clicked, this, &StartOption::save);
 
     QWidget *container = new QWidget(this);
@@ -37,7 +38,7 @@ StartOption::StartOption(QWidget *parent)
     inner->addWidget(autoStartup);
     inner->addWidget(showMainWindow);
     inner->addWidget(updateCheck);
-    inner->addWidget(saveButton);
+    inner->addWidget(saveButton, 0, Qt::AlignHCenter);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(container, 0, Qt::AlignHCenter);
