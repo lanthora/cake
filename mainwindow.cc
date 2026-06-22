@@ -8,7 +8,6 @@
 #include <QGraphicsDropShadowEffect>
 #include <QHBoxLayout>
 #include <QIcon>
-#include <QListWidget>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -19,8 +18,9 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    setWindowTitle("组网工具");
-    setFixedSize(850, 570);
+    setWindowTitle("Cake");
+    resize(600, 590);
+    setMinimumSize(600, 400);
     setWindowIcon(QIcon(":/logo.ico"));
 
     addCentralWidget();
@@ -29,7 +29,6 @@ MainWindow::MainWindow(QWidget *parent)
     addHelpMenu();
     addSystemTray();
 
-    // 显示主界面
     if (settings.value("showmainwindow", true).toBool()) {
         show();
     }
@@ -37,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
     Update *update = new Update(this);
     connect(update, &Update::notify, [&](QString current, QString latest) {
         show();
-        if (QMessageBox::question(this, "更新提示", QString("检查到新版本: " + latest + ", 请及时更新")) == QMessageBox::Yes) {
+        if (QMessageBox::question(this, "Update", QString("New version available: " + latest)) == QMessageBox::Yes) {
             QDesktopServices::openUrl(QUrl("https://github.com/lanthora/cake/releases/latest"));
         }
     });
@@ -47,26 +46,23 @@ MainWindow::~MainWindow() {}
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    // 在菜单里选择退出时无需确认直接退出
     if (forceQuit) {
         event->accept();
         return;
     }
 
-    // 点击 X 退出,有系统托盘,发送通知并以托盘形式运行
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
         if (settings.value("backgroundnotification", true).toBool()) {
             settings.setValue("backgroundnotification", false);
             settings.sync();
-            this->trayIcon->showMessage("后台运行", "进程将以托盘的形式在后台持续运行");
+            this->trayIcon->showMessage("Background", "Running in system tray");
         }
         event->ignore();
         hide();
         return;
     }
 
-    // 点击 X 退出,但没有系统托盘,退出前确认
-    if (QMessageBox::question(this, "退出", "退出后将断开所有虚拟网络连接,确认退出?") == QMessageBox::No) {
+    if (QMessageBox::question(this, "Quit", "Quitting will disconnect all networks. Continue?") == QMessageBox::No) {
         event->ignore();
         return;
     }
@@ -75,7 +71,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::onSystemTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
-    // 左键点击托盘显示主窗口
     if (reason == QSystemTrayIcon::Trigger) {
         showNormal();
         activateWindow();
@@ -90,13 +85,12 @@ void MainWindow::directQuit()
 
 void MainWindow::addFileMenu()
 {
-    QMenu *fileMenu = menuBar()->addMenu("文件");
-    QAction *newAction = new QAction("新建", fileMenu);
-    QAction *quitAction = new QAction("退出", fileMenu);
-    connect(newAction, &QAction::triggered, [&] { detailArea->reset(candyList->count() == 0); });
-    connect(quitAction, &QAction::triggered, [&] {
-        // 新建的时候可能会误触退出,再确认一次
-        if (QMessageBox::question(this, "退出", "退出后将断开所有虚拟网络连接,确认退出?") == QMessageBox::Yes) {
+    QMenu *fileMenu = menuBar()->addMenu("File");
+    QAction *newAction = new QAction("New", fileMenu);
+    QAction *quitAction = new QAction("Quit", fileMenu);
+    connect(newAction, &QAction::triggered, [this] { detailArea->reset(true); });
+    connect(quitAction, &QAction::triggered, [this] {
+        if (QMessageBox::question(this, "Quit", "Quitting will disconnect all networks. Continue?") == QMessageBox::Yes) {
             directQuit();
         }
     });
@@ -107,8 +101,8 @@ void MainWindow::addFileMenu()
 
 void MainWindow::addEditMenu()
 {
-    QMenu *settingMenu = menuBar()->addMenu("编辑");
-    QAction *autoStartAction = new QAction("启动选项", settingMenu);
+    QMenu *settingMenu = menuBar()->addMenu("Settings");
+    QAction *autoStartAction = new QAction("Startup", settingMenu);
 
     StartOption *startOption = new StartOption(this);
     connect(autoStartAction, &QAction::triggered, startOption, &StartOption::show);
@@ -118,12 +112,12 @@ void MainWindow::addEditMenu()
 
 void MainWindow::addHelpMenu()
 {
-    QMenu *helpMenu = menuBar()->addMenu("帮助");
+    QMenu *helpMenu = menuBar()->addMenu("Help");
 
-    QAction *feedbackAction = new QAction("问题反馈", helpMenu);
+    QAction *feedbackAction = new QAction("Feedback", helpMenu);
     Feedback *feedback = new Feedback(this);
 
-    QAction *aboutAction = new QAction("关于", helpMenu);
+    QAction *aboutAction = new QAction("About", helpMenu);
     About *about = new About(this);
 
     connect(feedbackAction, &QAction::triggered, feedback, &Feedback::show);
@@ -135,36 +129,18 @@ void MainWindow::addHelpMenu()
 
 void MainWindow::addCentralWidget()
 {
-    candyList->setParent(this);
     detailArea->setParent(this);
+    setCentralWidget(detailArea);
 
-    // 右侧保存时追加左侧列表
-    detailArea->setCandyList(candyList);
-
-    // 将列表和详细信息区域添加到主窗口
-    QWidget *placeholder = new QWidget(this);
-    QHBoxLayout *layout = new QHBoxLayout;
-    layout->addWidget(candyList, 1);
-    layout->addWidget(detailArea, 2);
-    placeholder->setLayout(layout);
-    setCentralWidget(placeholder);
-
-    centralWidget()->setLayout(layout);
-
-    // 连接列表的 itemClicked() 信号到详细信息区域的更新函数
-    connect(candyList, &QListWidget::itemClicked, detailArea, &DetailArea::selectItem);
-
-    // 状态栏显示当前地址
     connect(detailArea, &DetailArea::updateTitle, this, &MainWindow::setWindowTitle);
 }
 
 void MainWindow::addSystemTray()
 {
-    // 添加系统托盘
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
         QMenu *trayMenu = new QMenu(this);
         QIcon quitIcon = QApplication::style()->standardIcon(QStyle::SP_TabCloseButton);
-        QAction *quitAction = new QAction(quitIcon, "退出", trayMenu);
+        QAction *quitAction = new QAction(quitIcon, "Quit", trayMenu);
         connect(quitAction, &QAction::triggered, this, &MainWindow::directQuit);
 
         trayMenu->addAction(quitAction);
@@ -172,7 +148,7 @@ void MainWindow::addSystemTray()
         trayIcon = new QSystemTrayIcon(this);
         connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::onSystemTrayActivated);
         trayIcon->setIcon(QIcon(":/logo.ico"));
-        trayIcon->setToolTip("组网工具");
+        trayIcon->setToolTip("Cake");
         trayIcon->setContextMenu(trayMenu);
         trayIcon->show();
     }

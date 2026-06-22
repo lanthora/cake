@@ -1,14 +1,17 @@
 #ifndef DETAILAREA_H
 #define DETAILAREA_H
 
-#include "candylist.h"
+#include <QComboBox>
 #include <QFrame>
 #include <QLabel>
 #include <QLineEdit>
-#include <QListWidgetItem>
+#include <QMap>
 #include <QPushButton>
+#include <QScrollArea>
 #include <QSettings>
 #include <QVBoxLayout>
+
+class CandyItem;
 
 class DetailArea : public QFrame
 {
@@ -16,8 +19,10 @@ class DetailArea : public QFrame
 
 public:
     explicit DetailArea();
-    void setCandyList(CandyList *candyList);
-    void selectItem(QListWidgetItem *item);
+    ~DetailArea();
+
+public slots:
+    void selectItem(const QString &name);
     void reset(bool fillDefault = false);
     void save();
     void remove();
@@ -26,25 +31,27 @@ signals:
     void updateTitle(const QString &text);
 
 private:
-    QWidget *detailWidget = nullptr;
+    QComboBox *selector;
+    QScrollArea *scrollArea;
+    QWidget *detailWidget;
 
-private:
-    QLineEdit *name = new QLineEdit(this);
-    QLineEdit *websocket = new QLineEdit(this);
-    QLineEdit *password = new QLineEdit(this);
-    QLineEdit *tun = new QLineEdit(this);
-    QLineEdit *stun = new QLineEdit(this);
-    QLineEdit *port = new QLineEdit(this);
-    QLineEdit *discovery = new QLineEdit(this);
-    QLineEdit *route = new QLineEdit(this);
-    QLineEdit *localhost = new QLineEdit(this);
-    QPushButton *removeButton = new QPushButton("删除", this);
-    QPushButton *saveButton = new QPushButton("保存", this);
-    QWidget *createInputWidget(QString label, QLineEdit *input);
-    QWidget *createSaveButton();
+    QLineEdit *websocket;
+    QLineEdit *password;
+    QLineEdit *tun;
+    QLineEdit *stun;
+    QLineEdit *port;
+    QLineEdit *discovery;
+    QLineEdit *route;
+    QLineEdit *localhost;
+    QLineEdit *mtu;
+    QPushButton *removeButton;
+    QPushButton *saveButton;
 
-private:
-    CandyList *candyList = nullptr;
+    QMap<QString, CandyItem *> items;
+
+    QWidget *createInputRow(const QString &label, QWidget *input);
+    QWidget *createButtonRow();
+
     QSettings settings;
 };
 

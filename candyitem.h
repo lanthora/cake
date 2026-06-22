@@ -1,18 +1,24 @@
 #ifndef CANDYITEM_H
 #define CANDYITEM_H
 
-#include <QListWidgetItem>
+#include <QString>
+#include <string>
+#include <thread>
 
-class CandyItem : public QListWidgetItem
+class CandyItem
 {
 public:
-    explicit CandyItem();
+    explicit CandyItem(const QString &name);
     ~CandyItem();
-
     void update();
 
+    const QString &name() const { return m_name; }
+
 private:
-    std::shared_ptr<void> candy;
+    QString m_name;
+    std::string id;
+    std::thread clientThread;
+    bool started = false;
 };
 
 #endif // CANDYITEM_H

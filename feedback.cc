@@ -5,8 +5,9 @@
 Feedback::Feedback(QWidget *parent)
     : QDialog(parent)
 {
-    setWindowTitle("问题反馈");
-    setFixedSize(500, 300);
+    setWindowTitle("Feedback");
+    resize(500, 300);
+    setMinimumSize(400, 240);
 
     QLabel *qq = new QLabel(
         "<b>QQ:</b><br>"

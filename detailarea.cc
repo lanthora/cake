@@ -1,44 +1,112 @@
 #include "detailarea.h"
 #include "candyitem.h"
-#include "candylist.h"
+#include "candy/candy.h"
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QScrollArea>
 #include <QVBoxLayout>
 
 DetailArea::DetailArea()
 {
-    detailWidget = new QWidget(this);
-    detailWidget->hide();
+    QVBoxLayout *outerLayout = new QVBoxLayout(this);
+    outerLayout->setContentsMargins(0, 0, 0, 0);
+
+    scrollArea = new QScrollArea(this);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scrollArea->setFrameShape(QFrame::NoFrame);
+    scrollArea->hide();
+
+    detailWidget = new QWidget;
+    scrollArea->setWidget(detailWidget);
+
     QVBoxLayout *layout = new QVBoxLayout(detailWidget);
+    layout->setContentsMargins(16, 12, 16, 12);
+    layout->setSpacing(10);
+
+    selector = new QComboBox;
+    selector->setEditable(true);
+    selector->setInsertPolicy(QComboBox::NoInsert);
+    selector->setCompleter(nullptr);
+    selector->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    selector->addItem("+ New");
+
+    websocket = new QLineEdit;
+    password = new QLineEdit;
     password->setEchoMode(QLineEdit::Password);
+    tun = new QLineEdit;
+    stun = new QLineEdit;
+    port = new QLineEdit;
+    discovery = new QLineEdit;
+    route = new QLineEdit;
+    localhost = new QLineEdit;
+    mtu = new QLineEdit;
+    removeButton = new QPushButton("Delete");
+    saveButton = new QPushButton("Save");
 
-    layout->addWidget(createInputWidget("网卡名", name));
-    layout->addWidget(createInputWidget("服务器地址", websocket));
-    layout->addWidget(createInputWidget("口令", password));
-    layout->addWidget(createInputWidget("静态地址", tun));
-    layout->addWidget(createInputWidget("STUN", stun));
-    layout->addWidget(createInputWidget("对等连接端口", port));
-    layout->addWidget(createInputWidget("主动发现间隔", discovery));
-    layout->addWidget(createInputWidget("本机路由代价", route));
-    layout->addWidget(createInputWidget("本机内网地址", localhost));
-    layout->addWidget(createSaveButton());
+    layout->addWidget(createInputRow("Network", selector));
+    layout->addWidget(createInputRow("Server", websocket));
+    layout->addWidget(createInputRow("Password", password));
+    layout->addWidget(createInputRow("Address", tun));
+    layout->addWidget(createInputRow("STUN", stun));
+    layout->addWidget(createInputRow("Localhost", localhost));
+    layout->addWidget(createInputRow("Port", port));
+    layout->addWidget(createInputRow("Discovery (s)", discovery));
+    layout->addWidget(createInputRow("Route Cost", route));
+    layout->addWidget(createInputRow("MTU", mtu));
+    layout->addStretch();
+
+    connect(selector, &QComboBox::currentTextChanged, this, [this](const QString &text) {
+        if (text == "+ New") {
+            reset(true);
+        } else if (items.contains(text)) {
+            selectItem(text);
+        }
+    });
+
+    connect(saveButton, &QPushButton::clicked, this, &DetailArea::save);
+    connect(removeButton, &QPushButton::clicked, this, &DetailArea::remove);
+
+    outerLayout->addWidget(scrollArea);
+    outerLayout->addWidget(createButtonRow());
+
+    QSettings s;
+    s.setFallbacksEnabled(false);
+    if (s.value("vmac").isNull()) {
+        s.setValue("vmac", QString::fromStdString(candy::create_vmac()));
+        s.sync();
+    }
+    for (const QString &group : s.childGroups()) {
+        CandyItem *item = new CandyItem(group);
+        items[group] = item;
+        selector->addItem(group);
+        item->update();
+    }
+
+    if (!items.isEmpty()) {
+        selectItem(items.firstKey());
+    } else {
+        reset(true);
+    }
 }
 
-void DetailArea::setCandyList(CandyList *candyList)
+DetailArea::~DetailArea()
 {
-    this->candyList = candyList;
+    for (auto item : items) {
+        delete item;
+    }
 }
 
-void DetailArea::selectItem(QListWidgetItem *item)
+void DetailArea::selectItem(const QString &key)
 {
-    candyList->setCurrentItem(item);
-    name->setEnabled(false);
-    removeButton->setEnabled(true);
+    if (key.isEmpty() || !items.contains(key)) {
+        return;
+    }
 
-    settings.beginGroup(item->text());
-    name->setText(item->text());
+    settings.beginGroup(key);
     websocket->setText(settings.value("websocket").toString());
     password->setText(settings.value("password").toString());
     tun->setText(settings.value("tun").toString());
@@ -47,17 +115,23 @@ void DetailArea::selectItem(QListWidgetItem *item)
     discovery->setText(settings.value("discovery").toString());
     route->setText(settings.value("route").toString());
     localhost->setText(settings.value("localhost").toString());
+    mtu->setText(settings.value("mtu").toString());
     updateTitle(settings.value("expected").toString());
     settings.endGroup();
 
-    detailWidget->show();
+    removeButton->setEnabled(true);
+    scrollArea->show();
 
-    return;
+    selector->setEditable(false);
+    selector->blockSignals(true);
+    selector->setCurrentText(key);
+    selector->blockSignals(false);
 }
 
 void DetailArea::reset(bool fillDefault)
 {
-    name->setText("");
+    selector->setEditable(true);
+
     websocket->setText("");
     password->setText("");
     tun->setText("");
@@ -66,56 +140,50 @@ void DetailArea::reset(bool fillDefault)
     discovery->setText("");
     route->setText("");
     localhost->setText("");
+    mtu->setText("");
 
     if (fillDefault) {
-        name->setText("candy");
         websocket->setText("wss://canets.org");
         stun->setText("stun://stun.canets.org");
         discovery->setText("300");
         route->setText("5");
+        mtu->setText("1400");
+        selector->setEditable(true);
+        selector->blockSignals(true);
+        selector->setCurrentText("candy");
+        selector->blockSignals(false);
+    } else {
+        selector->clearEditText();
     }
 
-    candyList->clearFocus();
-    candyList->clearSelection();
     removeButton->setEnabled(false);
-    name->setEnabled(true);
+    updateTitle("New Network");
 
-    updateTitle("新增网络");
-
-    detailWidget->show();
-    return;
+    scrollArea->show();
 }
 
 void DetailArea::save()
 {
-    if (name->text().isEmpty()) {
-        QMessageBox::warning(this, "", "网卡名不能为空");
+    const QString key = selector->currentText().trimmed();
+
+    if (key.isEmpty()) {
+        QMessageBox::warning(this, "", "Name cannot be empty");
         return;
     }
     if (websocket->text().isEmpty()) {
-        QMessageBox::warning(this, "", "服务端地址不能为空");
+        QMessageBox::warning(this, "", "Server cannot be empty");
         return;
     }
 
-    CandyItem *item = nullptr;
+    const bool isNew = !items.contains(key);
 
-    // 新增配置,确保网卡名不重复
-    if (name->isEnabled()) {
-        for (int idx = 0; idx < candyList->count(); ++idx) {
-            if (candyList->item(idx)->text() == name->text()) {
-                QMessageBox::warning(this, "", "网卡名已经存在,请重新设置");
-                return;
-            }
-        }
-        // 读出参数,根据网卡名更新配置,并重启对应的网络
-        item = new CandyItem;
-        item->setText((name->text()));
-        candyList->addItem(item);
-    } else {
-        item = dynamic_cast<CandyItem *>(candyList->currentItem());
+    if (isNew) {
+        CandyItem *item = new CandyItem(key);
+        items[key] = item;
+        selector->addItem(key);
     }
 
-    settings.beginGroup(item->text());
+    settings.beginGroup(key);
     settings.setValue("websocket", websocket->text());
     settings.setValue("password", password->text());
     settings.setValue("tun", tun->text());
@@ -124,62 +192,62 @@ void DetailArea::save()
     settings.setValue("discovery", discovery->text());
     settings.setValue("route", route->text());
     settings.setValue("localhost", localhost->text());
+    settings.setValue("mtu", mtu->text());
     settings.endGroup();
     settings.sync();
 
-    item->update();
-
-    selectItem(item);
-    return;
+    items[key]->update();
+    selectItem(key);
 }
 
 void DetailArea::remove()
 {
-    removeButton->setEnabled(false);
-    int row = candyList->currentRow();
-    CandyItem *item = dynamic_cast<CandyItem *>(candyList->takeItem(row));
-    QString name = item->text();
-    delete item;
+    const QString key = selector->currentText();
 
-    settings.remove(name);
+    if (key.isEmpty() || !items.contains(key)) {
+        return;
+    }
+
+    removeButton->setEnabled(false);
+
+    int idx = selector->findText(key);
+    if (idx >= 0) {
+        selector->blockSignals(true);
+        selector->removeItem(idx);
+        selector->blockSignals(false);
+    }
+
+    delete items.take(key);
+    settings.remove(key);
     settings.sync();
 
-    if (candyList->count() == 0) {
-        reset();
-    } else if (candyList->count() > row) {
-        selectItem(candyList->item(row));
+    if (items.isEmpty()) {
+        reset(true);
     } else {
-        selectItem(candyList->item(candyList->count() - 1));
+        selectItem(items.firstKey());
     }
-    return;
 }
 
-QWidget *DetailArea::createInputWidget(QString key, QLineEdit *input)
+QWidget *DetailArea::createInputRow(const QString &label, QWidget *input)
 {
-    QWidget *widget = new QWidget(this);
-    QHBoxLayout *layout = new QHBoxLayout(widget);
-    QLabel *label = new QLabel(this);
-    label->setText(key);
-    label->setFixedWidth(110);
-    label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    label->setContentsMargins(0, 0, 10, 0);
-    input->setFixedWidth(400);
-    layout->addWidget(label, 1);
-    layout->addWidget(input, 5);
-    widget->setFixedHeight(45);
-    return widget;
+    QWidget *row = new QWidget;
+    QHBoxLayout *hLayout = new QHBoxLayout(row);
+    hLayout->setContentsMargins(0, 4, 0, 4);
+    QLabel *lbl = new QLabel(label);
+    lbl->setMinimumWidth(110);
+    lbl->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    hLayout->addWidget(lbl);
+    hLayout->addWidget(input, 1);
+    return row;
 }
 
-QWidget *DetailArea::createSaveButton()
+QWidget *DetailArea::createButtonRow()
 {
-    QWidget *widget = new QWidget(this);
-    QHBoxLayout *layout = new QHBoxLayout(widget);
-
-    connect(removeButton, &QPushButton::clicked, this, &DetailArea::remove);
-    layout->addWidget(removeButton);
-
-    connect(saveButton, &QPushButton::clicked, this, &DetailArea::save);
-    layout->addWidget(saveButton);
-
-    return widget;
+    QWidget *row = new QWidget;
+    QHBoxLayout *hLayout = new QHBoxLayout(row);
+    hLayout->setContentsMargins(16, 8, 16, 8);
+    hLayout->addStretch();
+    hLayout->addWidget(removeButton);
+    hLayout->addWidget(saveButton);
+    return row;
 }

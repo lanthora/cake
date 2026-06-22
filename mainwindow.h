@@ -1,7 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "candylist.h"
 #include "detailarea.h"
 #include <QCloseEvent>
 #include <QMainWindow>
@@ -33,7 +32,6 @@ private:
     QSystemTrayIcon *trayIcon = nullptr;
     bool forceQuit = false;
 
-    CandyList *candyList = new CandyList;
     DetailArea *detailArea = new DetailArea;
     QSettings settings;
 };

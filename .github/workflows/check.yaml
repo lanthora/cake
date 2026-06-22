@@ -46,7 +46,7 @@ jobs:
       shell: msys2 {0}
       run: |
         ./winqtcollect.sh target/artifacts/cake.exe target/artifacts
-        cp build/_deps/candy-build/src/tun/wintun/bin/amd64/wintun.dll target/artifacts
+        cp build/_deps/candy-build/candy/wintun/bin/amd64/wintun.dll target/artifacts
         cp logo.ico target
         cp build/setup.iss target
     - name: upload artifact

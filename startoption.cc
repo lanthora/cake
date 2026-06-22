@@ -9,12 +9,9 @@
 StartOption::StartOption(QWidget *parent)
     : QDialog(parent)
 {
-    setWindowTitle("启动选项");
-    setFixedSize(500, 300);
-
-    autoStartup->setFixedWidth(100);
-    showMainWindow->setFixedWidth(100);
-    updateCheck->setFixedWidth(100);
+    setWindowTitle("Startup");
+    resize(500, 300);
+    setMinimumSize(400, 220);
 
     if (QSysInfo::productType() == "windows") {
         autoStartup->setChecked(settings.value("autostartup", true).toBool());
@@ -32,14 +29,18 @@ StartOption::StartOption(QWidget *parent)
 
     updateCheck->setChecked(settings.value("updatecheck", true).toBool());
 
-    QPushButton *saveButton = new QPushButton("保存", this);
+    QPushButton *saveButton = new QPushButton("Save", this);
     connect(saveButton, &QPushButton::clicked, this, &StartOption::save);
 
+    QWidget *container = new QWidget(this);
+    QVBoxLayout *inner = new QVBoxLayout(container);
+    inner->addWidget(autoStartup);
+    inner->addWidget(showMainWindow);
+    inner->addWidget(updateCheck);
+    inner->addWidget(saveButton);
+
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->addWidget(autoStartup, 0, Qt::AlignCenter);
-    layout->addWidget(showMainWindow, 0, Qt::AlignCenter);
-    layout->addWidget(updateCheck, 0, Qt::AlignCenter);
-    layout->addWidget(saveButton, 0, Qt::AlignCenter);
+    layout->addWidget(container, 0, Qt::AlignHCenter);
 
     save();
 }
