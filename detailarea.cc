@@ -10,6 +10,23 @@
 #include <QTimer>
 #include <QVBoxLayout>
 
+class DropDownBox : public QComboBox
+{
+public:
+    using QComboBox::QComboBox;
+    void showPopup() override
+    {
+        QComboBox::showPopup();
+        QWidget *popup = findChild<QFrame *>();
+        if (popup && popup->isVisible()) {
+            QPoint pos = mapToGlobal(QPoint(0, height()));
+            if (popup->y() != pos.y()) {
+                popup->move(pos);
+            }
+        }
+    }
+};
+
 DetailArea::DetailArea()
 {
     QVBoxLayout *outerLayout = new QVBoxLayout(this);
@@ -28,7 +45,8 @@ DetailArea::DetailArea()
     layout->setContentsMargins(16, 12, 16, 12);
     layout->setSpacing(10);
 
-    selector = new QComboBox;
+    selector = new DropDownBox;
+    selector->setMaxVisibleItems(8);
     selector->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     newName = new QLineEdit;
@@ -51,6 +69,10 @@ DetailArea::DetailArea()
     saveButton = new QPushButton("Save");
     cancelButton = new QPushButton("Cancel");
     cancelButton->hide();
+
+    int inputHeight = websocket->sizeHint().height();
+    selector->setFixedHeight(inputHeight);
+    newName->setFixedHeight(inputHeight);
 
     layout->addWidget(createInputRow("Network", networkStack));
     layout->addWidget(createInputRow("Server", websocket));
