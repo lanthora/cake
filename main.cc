@@ -23,6 +23,33 @@ void configureWerDumpSettings()
 }
 #endif
 
+class SpdlogGuard
+{
+public:
+    SpdlogGuard()
+    {
+        spdlog::set_level(spdlog::level::debug);
+
+#ifdef Q_OS_WIN
+        QDir().mkpath("C:/ProgramData/Cake/logs");
+        auto max_size = 1048576 * 5;
+        auto max_files = 3;
+        auto logger = spdlog::rotating_logger_mt("candy", "C:/ProgramData/Cake/logs/candy.txt", max_size, max_files, true);
+        spdlog::set_default_logger(logger);
+        spdlog::flush_every(std::chrono::seconds(1));
+#endif
+    }
+
+    ~SpdlogGuard()
+    {
+        spdlog::drop_all();
+        spdlog::shutdown();
+    }
+
+    SpdlogGuard(const SpdlogGuard &) = delete;
+    SpdlogGuard &operator=(const SpdlogGuard &) = delete;
+};
+
 int main(int argc, char *argv[])
 {
     QCoreApplication::setOrganizationName("canets");
@@ -41,20 +68,7 @@ int main(int argc, char *argv[])
     }
     shared.create(1);
 
-    spdlog::set_level(spdlog::level::debug);
-
-#ifdef Q_OS_WIN
-    QDir().mkpath("C:/ProgramData/Cake/logs");
-    auto max_size = 1048576 * 5;
-    auto max_files = 3;
-    auto logger = spdlog::rotating_logger_mt("candy", "C:/ProgramData/Cake/logs/candy.txt", max_size, max_files, true);
-    spdlog::set_default_logger(logger);
-    spdlog::flush_every(std::chrono::seconds(1));
-#endif
-
+    SpdlogGuard logGuard;
     MainWindow w;
-    int ret = a.exec();
-    spdlog::drop_all();
-    spdlog::shutdown();
-    return ret;
+    return a.exec();
 }
