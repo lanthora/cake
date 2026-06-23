@@ -53,5 +53,8 @@ int main(int argc, char *argv[])
 #endif
 
     MainWindow w;
-    return a.exec();
+    int ret = a.exec();
+    spdlog::drop_all();
+    spdlog::shutdown();
+    return ret;
 }
