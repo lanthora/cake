@@ -48,11 +48,13 @@ private:
     QLineEdit *route;
     QLineEdit *localhost;
     QLineEdit *mtu;
+    QLineEdit *ipAddress;
     QPushButton *removeButton;
     QPushButton *saveButton;
     QPushButton *cancelButton;
 
     QMap<QString, CandyItem *> items;
+    QMap<QString, QString> cachedAddress;
 
     QWidget *createInputRow(const QString &label, QWidget *input);
     QWidget *createButtonRow();

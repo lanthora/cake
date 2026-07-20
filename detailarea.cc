@@ -1,12 +1,16 @@
 #include "detailarea.h"
-#include "candyitem.h"
 #include "candy/candy.h"
+#include "candyitem.h"
+#include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
+#include <QPainter>
+#include <QPainterPath>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QStyledItemDelegate>
 #include <QTimer>
 #include <QVBoxLayout>
 
@@ -27,6 +31,38 @@ public:
     }
 };
 
+class RoundedItemDelegate : public QStyledItemDelegate
+{
+public:
+    using QStyledItemDelegate::QStyledItemDelegate;
+
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing);
+
+        if (option.state & (QStyle::State_MouseOver | QStyle::State_Selected)) {
+            QPainterPath path;
+            path.addRoundedRect(QRectF(option.rect).adjusted(3, 2, -3, -2), 4, 4);
+            painter->setPen(Qt::NoPen);
+            painter->fillPath(path, QColor("#e8f0fe"));
+        }
+
+        const QString text = index.data(Qt::DisplayRole).toString();
+        painter->setPen(QColor("#222"));
+        painter->setFont(option.font);
+        painter->drawText(option.rect.adjusted(12, 0, -12, 0), Qt::AlignVCenter | Qt::AlignLeft, text);
+        painter->restore();
+    }
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        Q_UNUSED(option);
+        Q_UNUSED(index);
+        return QSize(100, 32);
+    }
+};
+
 DetailArea::DetailArea()
 {
     QVBoxLayout *outerLayout = new QVBoxLayout(this);
@@ -41,21 +77,29 @@ DetailArea::DetailArea()
     detailWidget = new QWidget;
     scrollArea->setWidget(detailWidget);
 
-    QVBoxLayout *layout = new QVBoxLayout(detailWidget);
-    layout->setContentsMargins(16, 12, 16, 12);
-    layout->setSpacing(10);
+    QGridLayout *layout = new QGridLayout(detailWidget);
+    layout->setContentsMargins(24, 16, 24, 16);
+    layout->setHorizontalSpacing(24);
+    layout->setVerticalSpacing(6);
+    layout->setColumnStretch(0, 1);
+    layout->setColumnStretch(1, 1);
 
     selector = new DropDownBox;
     selector->setMaxVisibleItems(8);
     selector->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    selector->setItemDelegate(new RoundedItemDelegate(selector));
 
     newName = new QLineEdit;
+    newName->setPlaceholderText("Enter network name...");
 
     networkStack = new QStackedWidget;
     networkStack->setFrameShape(QFrame::NoFrame);
     networkStack->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     networkStack->addWidget(selector);
     networkStack->addWidget(newName);
+
+    ipAddress = new QLineEdit;
+    ipAddress->setReadOnly(true);
 
     websocket = new QLineEdit;
     password = new QLineEdit;
@@ -68,28 +112,29 @@ DetailArea::DetailArea()
     localhost = new QLineEdit;
     mtu = new QLineEdit;
     removeButton = new QPushButton("Delete");
+    removeButton->setObjectName("dangerButton");
     saveButton = new QPushButton("Save");
+    saveButton->setObjectName("primaryButton");
     cancelButton = new QPushButton("Cancel");
+    cancelButton->setObjectName("dangerButton");
     cancelButton->hide();
 
-    int inputHeight = websocket->sizeHint().height();
-    selector->setFixedHeight(inputHeight);
-    newName->setFixedHeight(inputHeight);
-
-    layout->addWidget(createInputRow("Network", networkStack));
-    layout->addWidget(createInputRow("Server", websocket));
-    layout->addWidget(createInputRow("Password", password));
-    layout->addWidget(createInputRow("Address", tun));
-    layout->addWidget(createInputRow("STUN", stun));
-    layout->addWidget(createInputRow("Localhost", localhost));
-    layout->addWidget(createInputRow("Port", port));
-    layout->addWidget(createInputRow("Discovery (s)", discovery));
-    layout->addWidget(createInputRow("Route Cost", route));
-    layout->addWidget(createInputRow("MTU", mtu));
-    layout->addStretch();
+    layout->addWidget(createInputRow("Name", networkStack), 0, 0);
+    layout->addWidget(createInputRow("Network", ipAddress), 0, 1);
+    layout->addWidget(createInputRow("Server", websocket), 1, 0);
+    layout->addWidget(createInputRow("Password", password), 1, 1);
+    layout->addWidget(createInputRow("Static Address", tun), 2, 0);
+    layout->addWidget(createInputRow("STUN", stun), 2, 1);
+    layout->addWidget(createInputRow("Localhost", localhost), 3, 0);
+    layout->addWidget(createInputRow("Listen Port", port), 3, 1);
+    layout->addWidget(createInputRow("Active Discovery Interval", discovery), 4, 0);
+    layout->addWidget(createInputRow("Route Cost", route), 4, 1);
+    layout->addWidget(createInputRow("MTU", mtu), 5, 0, 1, 2);
+    layout->setRowStretch(6, 1);
 
     connect(selector, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int idx) {
-        if (idx < 0) return;
+        if (idx < 0)
+            return;
         QString text = selector->itemText(idx);
         if (items.contains(text)) {
             selectItem(text);
@@ -120,17 +165,19 @@ DetailArea::DetailArea()
         items[group] = item;
         selector->addItem(group);
         item->update();
+        cachedAddress[group] = "Connecting...";
     }
 
     if (!items.isEmpty()) {
         selectItem(items.firstKey());
     } else {
         reset(true);
+        save();
     }
 
     statusTimer = new QTimer(this);
     connect(statusTimer, &QTimer::timeout, this, &DetailArea::pollStatus);
-    statusTimer->start(5000);
+    statusTimer->start(1000);
 }
 
 DetailArea::~DetailArea()
@@ -157,18 +204,47 @@ void DetailArea::selectItem(const QString &key)
     localhost->setText(settings.value("localhost").toString());
     mtu->setText(settings.value("mtu").toString());
 
-    QString title;
-    auto status = candy::client::status(key.toStdString());
-    if (status && status->has("address")) {
-        title = QString::fromStdString(status->getValue<std::string>("address"));
-        if (settings.value("expected").toString() != title) {
-            settings.setValue("expected", title);
-            settings.sync();
+    websocket->setPlaceholderText("");
+    password->setPlaceholderText("");
+    tun->setPlaceholderText("");
+    stun->setPlaceholderText("");
+    port->setPlaceholderText("");
+    discovery->setPlaceholderText("");
+    route->setPlaceholderText("");
+    localhost->setPlaceholderText("");
+    mtu->setPlaceholderText("");
+
+    {
+        auto status = candy::client::status(key.toStdString());
+        if (status && status->has("address")) {
+            QString addr = QString::fromStdString(status->getValue<std::string>("address"));
+            if (!addr.isEmpty()) {
+                if (settings.value("expected").toString() != addr) {
+                    settings.setValue("expected", addr);
+                    settings.sync();
+                }
+                cachedAddress[key] = addr;
+                ipAddress->setText(addr);
+                settings.endGroup();
+
+                removeButton->setEnabled(true);
+                cancelButton->hide();
+                removeButton->show();
+                scrollArea->show();
+
+                networkStack->setCurrentWidget(selector);
+                selector->blockSignals(true);
+                selector->setCurrentText(key);
+                selector->blockSignals(false);
+                return;
+            }
         }
-    } else {
-        title = settings.value("expected").toString();
+        if (cachedAddress.contains(key)) {
+            ipAddress->setText(cachedAddress[key]);
+        } else {
+            ipAddress->setText("Connecting...");
+        }
     }
-    updateTitle(title);
     settings.endGroup();
 
     removeButton->setEnabled(true);
@@ -198,10 +274,20 @@ void DetailArea::reset(bool fillDefault)
     localhost->setText("");
     mtu->setText("");
 
+    websocket->setPlaceholderText("wss://server.example.com");
+    password->setPlaceholderText("Enter password");
+    tun->setPlaceholderText("10.0.0.1/24 (auto-assigned if empty)");
+    stun->setPlaceholderText("stun://stun.example.com");
+    port->setPlaceholderText("0");
+    discovery->setPlaceholderText("300");
+    route->setPlaceholderText("5");
+    localhost->setPlaceholderText("Local peer address (auto-detect if empty)");
+    mtu->setPlaceholderText("1400");
+
     networkStack->setCurrentWidget(newName);
     newName->setText("");
 
-    if (fillDefault) {
+    if (fillDefault && items.isEmpty()) {
         websocket->setText("wss://canets.org");
         stun->setText("stun://stun.canets.org");
         discovery->setText("300");
@@ -210,10 +296,12 @@ void DetailArea::reset(bool fillDefault)
         newName->setText("candy");
     }
 
+    ipAddress->clear();
+
     removeButton->setEnabled(false);
     removeButton->hide();
+    cancelButton->setEnabled(!items.isEmpty());
     cancelButton->show();
-    updateTitle("New Network");
 
     scrollArea->show();
 }
@@ -224,22 +312,56 @@ void DetailArea::save()
     const QString key = (isNew ? newName->text() : selector->currentText()).trimmed();
 
     if (key.isEmpty()) {
-        QMessageBox::warning(this, "", "Name cannot be empty");
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::NoIcon);
+        msgBox.setWindowTitle("Cake");
+        msgBox.setText("Name cannot be empty");
+        msgBox.exec();
         return;
     }
     if (websocket->text().isEmpty()) {
-        QMessageBox::warning(this, "", "Server cannot be empty");
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::NoIcon);
+        msgBox.setWindowTitle("Cake");
+        msgBox.setText("Server cannot be empty");
+        msgBox.exec();
         return;
     }
 
     if (isNew) {
         if (items.contains(key)) {
-            QMessageBox::warning(this, "", "Name already exists");
+            QMessageBox msgBox(this);
+            msgBox.setIcon(QMessageBox::NoIcon);
+            msgBox.setWindowTitle("Cake");
+            msgBox.setText("Network name already exists");
+            msgBox.exec();
             return;
         }
+    }
+
+    QString serverUrl = websocket->text().trimmed();
+    for (auto it = items.begin(); it != items.end(); ++it) {
+        if (it.key() == key)
+            continue;
+        settings.beginGroup(it.key());
+        QString existing = settings.value("websocket").toString();
+        settings.endGroup();
+        if (existing == serverUrl) {
+            QMessageBox msgBox(this);
+            msgBox.setIcon(QMessageBox::NoIcon);
+            msgBox.setWindowTitle("Cake");
+            msgBox.setText("Server already used by \"" + it.key() + "\"");
+            msgBox.exec();
+            return;
+        }
+    }
+
+    if (isNew) {
         CandyItem *item = new CandyItem(key);
         items[key] = item;
+        selector->blockSignals(true);
         selector->addItem(key);
+        selector->blockSignals(false);
     }
 
     settings.beginGroup(key);
@@ -256,6 +378,8 @@ void DetailArea::save()
     settings.sync();
 
     items[key]->update();
+    cachedAddress.remove(key);
+    ipAddress->setText("Connecting...");
     selectItem(key);
 }
 
@@ -277,6 +401,7 @@ void DetailArea::remove()
     }
 
     delete items.take(key);
+    cachedAddress.remove(key);
     settings.remove(key);
     settings.sync();
 
@@ -289,10 +414,14 @@ void DetailArea::remove()
 
 void DetailArea::pollStatus()
 {
+    bool connected = false;
     for (auto it = items.begin(); it != items.end(); ++it) {
         auto status = candy::client::status(it.value()->name().toStdString());
         if (status && status->has("address")) {
             QString addr = QString::fromStdString(status->getValue<std::string>("address"));
+            if (addr.isEmpty())
+                continue;
+            cachedAddress[it.key()] = addr;
             settings.beginGroup(it.key());
             if (settings.value("expected").toString() != addr) {
                 settings.setValue("expected", addr);
@@ -300,22 +429,25 @@ void DetailArea::pollStatus()
             }
             settings.endGroup();
             if (networkStack->currentWidget() == selector && selector->currentText() == it.key()) {
-                updateTitle(addr);
+                ipAddress->setText(addr);
+                connected = true;
             }
         }
     }
+    statusTimer->setInterval(networkStack->currentWidget() == selector && connected ? 5000 : 1000);
 }
 
 QWidget *DetailArea::createInputRow(const QString &label, QWidget *input)
 {
     QWidget *row = new QWidget;
-    QHBoxLayout *hLayout = new QHBoxLayout(row);
-    hLayout->setContentsMargins(0, 4, 0, 4);
+    QVBoxLayout *vLayout = new QVBoxLayout(row);
+    vLayout->setContentsMargins(0, 4, 0, 4);
+    vLayout->setSpacing(4);
     QLabel *lbl = new QLabel(label);
-    lbl->setMinimumWidth(110);
-    lbl->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    hLayout->addWidget(lbl);
-    hLayout->addWidget(input, 1);
+    lbl->setIndent(4);
+    lbl->setAlignment(Qt::AlignLeft);
+    vLayout->addWidget(lbl);
+    vLayout->addWidget(input);
     return row;
 }
 
@@ -323,7 +455,7 @@ QWidget *DetailArea::createButtonRow()
 {
     QWidget *row = new QWidget;
     QHBoxLayout *hLayout = new QHBoxLayout(row);
-    hLayout->setContentsMargins(16, 8, 16, 8);
+    hLayout->setContentsMargins(24, 12, 24, 12);
     hLayout->addStretch();
     hLayout->addWidget(cancelButton);
     hLayout->addWidget(removeButton);

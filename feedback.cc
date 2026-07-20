@@ -6,30 +6,29 @@ Feedback::Feedback(QWidget *parent)
     : QDialog(parent)
 {
     setWindowTitle("Feedback");
-    resize(500, 300);
-    setMinimumSize(400, 240);
+    resize(400, 200);
+    setMinimumSize(360, 180);
 
-    QLabel *qq = new QLabel(
-        "<b>QQ:</b><br>"
-        "768305206<br>",
-        this);
+    QLabel *qq = new QLabel("QQ: 768305206", this);
+    qq->setObjectName("feedbackItem");
     qq->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     QLabel *telegram = new QLabel(
-        "<b>Telegram:</b><br>"
-        "<a href=\"https://t.me/CandyUserGroup\">Click to Join</a><br>",
-        this);
+        "Telegram: <a href=\"https://t.me/CandyUserGroup\" style=\"color: #4a90d9; text-decoration: none;\">Join Group</a>", this);
+    telegram->setObjectName("feedbackItem");
     telegram->setOpenExternalLinks(true);
 
     QLabel *github = new QLabel(
-        "<b>Github:</b><br>"
-        "<a href=\"https://github.com/lanthora/cake/issues/new\">Create an issue</a>",
+        "GitHub: <a href=\"https://github.com/lanthora/cake/issues/new\" style=\"color: #4a90d9; text-decoration: none;\">Create "
+        "Issue</a>",
         this);
+    github->setObjectName("feedbackItem");
     github->setOpenExternalLinks(true);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->addWidget(qq, 0, Qt::AlignLeft);
-    layout->addWidget(telegram, 0, Qt::AlignLeft);
-    layout->addWidget(github, 0, Qt::AlignLeft);
-    layout->setAlignment(Qt::AlignCenter);
+    layout->setContentsMargins(32, 24, 32, 24);
+    layout->setSpacing(10);
+    layout->addWidget(qq);
+    layout->addWidget(telegram);
+    layout->addWidget(github);
 }

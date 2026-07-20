@@ -5,6 +5,7 @@
 #include "update.h"
 #include <QApplication>
 #include <QDesktopServices>
+#include <QFile>
 #include <QGraphicsDropShadowEffect>
 #include <QHBoxLayout>
 #include <QIcon>
@@ -13,15 +14,22 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QStatusBar>
+#include <QStyle>
 #include <QWidgetAction>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowTitle("Cake");
-    resize(600, 590);
-    setMinimumSize(600, 400);
+    resize(820, 590);
+    setMinimumSize(700, 530);
     setWindowIcon(QIcon(":/logo.ico"));
+
+    QFile styleFile(":/style.qss");
+    if (styleFile.open(QFile::ReadOnly)) {
+        setStyleSheet(styleFile.readAll());
+        styleFile.close();
+    }
 
     addCentralWidget();
     addFileMenu();
@@ -36,7 +44,13 @@ MainWindow::MainWindow(QWidget *parent)
     Update *update = new Update(this);
     connect(update, &Update::notify, [&](QString current, QString latest) {
         show();
-        if (QMessageBox::question(this, "Update", QString("New version available: " + latest)) == QMessageBox::Yes) {
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::NoIcon);
+        msgBox.setWindowTitle("Update");
+        msgBox.setText("New version available: " + latest);
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setMinimumWidth(500);
+        if (msgBox.exec() == QMessageBox::Yes) {
             QDesktopServices::openUrl(QUrl("https://github.com/lanthora/cake/releases/latest"));
         }
     });
@@ -62,7 +76,13 @@ void MainWindow::closeEvent(QCloseEvent *event)
         return;
     }
 
-    if (QMessageBox::question(this, "Quit", "Quitting will disconnect all networks. Continue?") == QMessageBox::No) {
+    QMessageBox msgBox(this);
+    msgBox.setIcon(QMessageBox::NoIcon);
+    msgBox.setWindowTitle("Quit");
+    msgBox.setText("Quitting will disconnect all networks. Continue?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setMinimumWidth(500);
+    if (msgBox.exec() == QMessageBox::No) {
         event->ignore();
         return;
     }
@@ -90,7 +110,13 @@ void MainWindow::addFileMenu()
     QAction *quitAction = new QAction("Quit", fileMenu);
     connect(newAction, &QAction::triggered, [this] { detailArea->reset(true); });
     connect(quitAction, &QAction::triggered, [this] {
-        if (QMessageBox::question(this, "Quit", "Quitting will disconnect all networks. Continue?") == QMessageBox::Yes) {
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::NoIcon);
+        msgBox.setWindowTitle("Quit");
+        msgBox.setText("Quitting will disconnect all networks. Continue?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setMinimumWidth(500);
+        if (msgBox.exec() == QMessageBox::Yes) {
             directQuit();
         }
     });
@@ -131,8 +157,6 @@ void MainWindow::addCentralWidget()
 {
     detailArea->setParent(this);
     setCentralWidget(detailArea);
-
-    connect(detailArea, &DetailArea::updateTitle, this, &MainWindow::setWindowTitle);
 }
 
 void MainWindow::addSystemTray()

@@ -74,7 +74,11 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QSharedMemory shared("canets.org/cake");
     if (shared.attach()) {
-        QMessageBox::warning(nullptr, "Cake", "Another instance is already running");
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::NoIcon);
+        msgBox.setWindowTitle("Cake");
+        msgBox.setText("Another instance is already running");
+        msgBox.exec();
         return 0;
     }
     shared.create(1);

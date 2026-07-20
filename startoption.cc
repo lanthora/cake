@@ -10,8 +10,8 @@ StartOption::StartOption(QWidget *parent)
     : QDialog(parent)
 {
     setWindowTitle("Startup");
-    resize(500, 300);
-    setMinimumSize(400, 220);
+    resize(400, 240);
+    setMinimumSize(360, 200);
 
     if (QSysInfo::productType() == "windows") {
         autoStartup->setChecked(settings.value("autostartup", true).toBool());
@@ -30,18 +30,18 @@ StartOption::StartOption(QWidget *parent)
     updateCheck->setChecked(settings.value("updatecheck", true).toBool());
 
     QPushButton *saveButton = new QPushButton("Save", this);
-    saveButton->setMaximumWidth(120);
+    saveButton->setObjectName("primaryButton");
+    saveButton->setMaximumWidth(100);
     connect(saveButton, &QPushButton::clicked, this, &StartOption::save);
 
-    QWidget *container = new QWidget(this);
-    QVBoxLayout *inner = new QVBoxLayout(container);
-    inner->addWidget(autoStartup);
-    inner->addWidget(showMainWindow);
-    inner->addWidget(updateCheck);
-    inner->addWidget(saveButton, 0, Qt::AlignHCenter);
-
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->addWidget(container, 0, Qt::AlignHCenter);
+    layout->setContentsMargins(24, 20, 24, 20);
+    layout->setSpacing(10);
+    layout->addWidget(autoStartup);
+    layout->addWidget(showMainWindow);
+    layout->addWidget(updateCheck);
+    layout->addSpacing(8);
+    layout->addWidget(saveButton, 0, Qt::AlignHCenter);
 
     save();
 }
