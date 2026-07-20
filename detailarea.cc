@@ -52,6 +52,8 @@ DetailArea::DetailArea()
     newName = new QLineEdit;
 
     networkStack = new QStackedWidget;
+    networkStack->setFrameShape(QFrame::NoFrame);
+    networkStack->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     networkStack->addWidget(selector);
     networkStack->addWidget(newName);
 

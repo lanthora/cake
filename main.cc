@@ -3,11 +3,12 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QSharedMemory>
-#include <spdlog/spdlog.h>
-
-#ifdef Q_OS_WIN
-#include <spdlog/sinks/rotating_file_sink.h>
-#endif
+#include <QStandardPaths>
+#include <Poco/AutoPtr.h>
+#include <Poco/FileChannel.h>
+#include <Poco/FormattingChannel.h>
+#include <Poco/Logger.h>
+#include <Poco/PatternFormatter.h>
 
 #ifdef Q_OS_WIN
 void configureWerDumpSettings()
@@ -23,31 +24,41 @@ void configureWerDumpSettings()
 }
 #endif
 
-class SpdlogGuard
+class PocoLogGuard
 {
 public:
-    SpdlogGuard()
+    PocoLogGuard()
     {
-        spdlog::set_level(spdlog::level::debug);
-
+        QString logDir;
 #ifdef Q_OS_WIN
-        QDir().mkpath("C:/ProgramData/Cake/logs");
-        auto max_size = 1048576 * 5;
-        auto max_files = 3;
-        auto logger = spdlog::rotating_logger_mt("candy", "C:/ProgramData/Cake/logs/candy.txt", max_size, max_files, true);
-        spdlog::set_default_logger(logger);
-        spdlog::flush_every(std::chrono::seconds(1));
+        logDir = "C:/ProgramData/Cake/logs";
+#else
+        logDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/logs";
 #endif
+        QDir().mkpath(logDir);
+
+        Poco::AutoPtr<Poco::FileChannel> fileChannel(new Poco::FileChannel);
+        fileChannel->setProperty("path", (logDir + "/candy.txt").toStdString());
+        fileChannel->setProperty("rotation", "5 M");
+        fileChannel->setProperty("archive", "number");
+        fileChannel->setProperty("purgeCount", "3");
+        fileChannel->setProperty("flush", "true");
+
+        Poco::AutoPtr<Poco::PatternFormatter> formatter(new Poco::PatternFormatter);
+        formatter->setProperty("pattern", "%Y-%m-%d %H:%M:%S [%q] %t");
+
+        Poco::AutoPtr<Poco::FormattingChannel> channel(new Poco::FormattingChannel(formatter, fileChannel));
+        Poco::Logger::root().setChannel(channel);
+        Poco::Logger::root().setLevel("debug");
     }
 
-    ~SpdlogGuard()
+    ~PocoLogGuard()
     {
-        spdlog::drop_all();
-        spdlog::shutdown();
+        Poco::Logger::root().setChannel(nullptr);
     }
 
-    SpdlogGuard(const SpdlogGuard &) = delete;
-    SpdlogGuard &operator=(const SpdlogGuard &) = delete;
+    PocoLogGuard(const PocoLogGuard &) = delete;
+    PocoLogGuard &operator=(const PocoLogGuard &) = delete;
 };
 
 int main(int argc, char *argv[])
@@ -68,7 +79,7 @@ int main(int argc, char *argv[])
     }
     shared.create(1);
 
-    SpdlogGuard logGuard;
+    PocoLogGuard logGuard;
     MainWindow w;
     return a.exec();
 }

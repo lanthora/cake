@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.28)
 
 project(cake LANGUAGES CXX)
 
-set (CANDY_VERSION "6.1.8")
-set (CAKE_RELEASE "4")
+set (CANDY_VERSION "6.1.9")
+set (CAKE_RELEASE "1")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -18,7 +18,6 @@ add_compile_definitions(CAKE_VERSION="${CAKE_VERSION}")
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core Network)
 find_package(Poco REQUIRED COMPONENTS Foundation JSON Net NetSSL)
-find_package(spdlog REQUIRED)
 
 add_executable(cake
     define.h main.cc
@@ -33,7 +32,7 @@ add_executable(cake
     images.qrc admin.rc
 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Gui Qt6::Core Qt6::Network Poco::Foundation Poco::JSON Poco::Net Poco::NetSSL spdlog::spdlog)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Gui Qt6::Core Qt6::Network Poco::Foundation Poco::JSON Poco::Net Poco::NetSSL)
 
 set_target_properties(cake PROPERTIES
     QT_TARGET_DESCRIPTION "Cake"
