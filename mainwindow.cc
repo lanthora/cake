@@ -1,7 +1,9 @@
 #include "mainwindow.h"
 #include "about.h"
+#include "confirmdialog.h"
 #include "feedback.h"
 #include "startoption.h"
+#include "titlebar.h"
 #include "update.h"
 #include <QApplication>
 #include <QDesktopServices>
@@ -11,18 +13,18 @@
 #include <QIcon>
 #include <QMenu>
 #include <QMenuBar>
-#include <QMessageBox>
 #include <QPushButton>
 #include <QStatusBar>
-#include <QStyle>
+#include <QVBoxLayout>
 #include <QWidgetAction>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowTitle("Cake");
-    resize(820, 590);
-    setMinimumSize(700, 530);
+    setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
+    resize(900, 640);
+    setMinimumSize(760, 560);
     setWindowIcon(QIcon(":/logo.ico"));
 
     QFile styleFile(":/style.qss");
@@ -31,7 +33,20 @@ MainWindow::MainWindow(QWidget *parent)
         styleFile.close();
     }
 
-    addCentralWidget();
+    titleBar = new TitleBar("Cake", this);
+    mainMenuBar = new QMenuBar(this);
+    mainMenuBar->setNativeMenuBar(false);
+
+    QWidget *central = new QWidget(this);
+    auto *centralLayout = new QVBoxLayout(central);
+    centralLayout->setContentsMargins(0, 0, 0, 0);
+    centralLayout->setSpacing(0);
+    centralLayout->addWidget(titleBar);
+    centralLayout->addWidget(mainMenuBar);
+    detailArea->setParent(central);
+    centralLayout->addWidget(detailArea);
+    setCentralWidget(central);
+
     addFileMenu();
     addEditMenu();
     addHelpMenu();
@@ -44,13 +59,10 @@ MainWindow::MainWindow(QWidget *parent)
     Update *update = new Update(this);
     connect(update, &Update::notify, [&](QString current, QString latest) {
         show();
-        QMessageBox msgBox(this);
-        msgBox.setIcon(QMessageBox::NoIcon);
-        msgBox.setWindowTitle("Update");
-        msgBox.setText("New version available: " + latest);
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msgBox.setMinimumWidth(500);
-        if (msgBox.exec() == QMessageBox::Yes) {
+        ConfirmDialog dialog("Update", "New version available: " + latest, this);
+        dialog.setConfirmButton("Download", ConfirmDialog::PrimaryButton);
+        dialog.setCancelButton("Later");
+        if (dialog.exec() == QDialog::Accepted) {
             QDesktopServices::openUrl(QUrl("https://github.com/lanthora/cake/releases/latest"));
         }
     });
@@ -76,13 +88,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
         return;
     }
 
-    QMessageBox msgBox(this);
-    msgBox.setIcon(QMessageBox::NoIcon);
-    msgBox.setWindowTitle("Quit");
-    msgBox.setText("Quitting will disconnect all networks. Continue?");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setMinimumWidth(500);
-    if (msgBox.exec() == QMessageBox::No) {
+    if (!confirmQuit()) {
         event->ignore();
         return;
     }
@@ -103,20 +109,22 @@ void MainWindow::directQuit()
     qApp->quit();
 }
 
+bool MainWindow::confirmQuit()
+{
+    ConfirmDialog dialog("Quit", "Quitting will disconnect all networks. Continue?", this);
+    dialog.setConfirmButton("Quit", ConfirmDialog::DangerButton);
+    dialog.setCancelButton("Cancel");
+    return dialog.exec() == QDialog::Accepted;
+}
+
 void MainWindow::addFileMenu()
 {
-    QMenu *fileMenu = menuBar()->addMenu("File");
+    QMenu *fileMenu = mainMenuBar->addMenu("File");
     QAction *newAction = new QAction("New", fileMenu);
     QAction *quitAction = new QAction("Quit", fileMenu);
     connect(newAction, &QAction::triggered, [this] { detailArea->reset(true); });
     connect(quitAction, &QAction::triggered, [this] {
-        QMessageBox msgBox(this);
-        msgBox.setIcon(QMessageBox::NoIcon);
-        msgBox.setWindowTitle("Quit");
-        msgBox.setText("Quitting will disconnect all networks. Continue?");
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msgBox.setMinimumWidth(500);
-        if (msgBox.exec() == QMessageBox::Yes) {
+        if (confirmQuit()) {
             directQuit();
         }
     });
@@ -127,7 +135,7 @@ void MainWindow::addFileMenu()
 
 void MainWindow::addEditMenu()
 {
-    QMenu *settingMenu = menuBar()->addMenu("Settings");
+    QMenu *settingMenu = mainMenuBar->addMenu("Settings");
     QAction *autoStartAction = new QAction("Startup", settingMenu);
 
     StartOption *startOption = new StartOption(this);
@@ -138,7 +146,7 @@ void MainWindow::addEditMenu()
 
 void MainWindow::addHelpMenu()
 {
-    QMenu *helpMenu = menuBar()->addMenu("Help");
+    QMenu *helpMenu = mainMenuBar->addMenu("Help");
 
     QAction *feedbackAction = new QAction("Feedback", helpMenu);
     Feedback *feedback = new Feedback(this);
@@ -153,18 +161,11 @@ void MainWindow::addHelpMenu()
     helpMenu->addAction(aboutAction);
 }
 
-void MainWindow::addCentralWidget()
-{
-    detailArea->setParent(this);
-    setCentralWidget(detailArea);
-}
-
 void MainWindow::addSystemTray()
 {
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
         QMenu *trayMenu = new QMenu(this);
-        QIcon quitIcon = QApplication::style()->standardIcon(QStyle::SP_TabCloseButton);
-        QAction *quitAction = new QAction(quitIcon, "Quit", trayMenu);
+        QAction *quitAction = new QAction("Quit", trayMenu);
         connect(quitAction, &QAction::triggered, this, &MainWindow::directQuit);
 
         trayMenu->addAction(quitAction);

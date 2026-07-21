@@ -295,10 +295,61 @@ QLabel#aboutDesc {
     line-height: 1.5;
 }
 
-QLabel#feedbackItem {
+QLabel#dialogTitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: #222;
+}
+
+QLabel#dialogSubtitle {
+    font-size: 13px;
+    color: #888;
+}
+
+QLabel#dialogHint {
+    font-size: 12px;
+    color: #888;
+}
+
+QLabel#feedbackLabel {
+    font-size: 13px;
+    color: #888;
+}
+
+QLabel#feedbackValue {
     font-size: 14px;
+    color: #222;
+}
+
+QWidget#titleBar {
+    background: #ffffff;
+    border-bottom: 1px solid #e4e6ea;
+}
+
+QLabel#titleBarText {
+    font-size: 13px;
+    font-weight: 600;
     color: #444;
-    padding: 2px 0;
+}
+
+QPushButton#titleBarCloseButton {
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    font-size: 18px;
+    color: #888;
+    padding: 0;
+    margin: 0;
+    min-width: 44px;
+}
+
+QPushButton#titleBarCloseButton:hover {
+    background: #fbe1df;
+    color: #d9534f;
+}
+
+QPushButton#titleBarCloseButton:pressed {
+    background: #f5c9c5;
 }
 
 QScrollBar:vertical {

@@ -6,6 +6,9 @@
 #include <QMainWindow>
 #include <QSystemTrayIcon>
 
+class TitleBar;
+class QMenuBar;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -20,15 +23,17 @@ protected:
 private:
     void onSystemTrayActivated(QSystemTrayIcon::ActivationReason reason);
     void directQuit();
+    bool confirmQuit();
 
 private:
     void addFileMenu();
     void addEditMenu();
     void addHelpMenu();
-    void addCentralWidget();
     void addSystemTray();
 
 private:
+    TitleBar *titleBar = nullptr;
+    QMenuBar *mainMenuBar = nullptr;
     QSystemTrayIcon *trayIcon = nullptr;
     bool forceQuit = false;
 

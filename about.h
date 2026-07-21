@@ -1,10 +1,10 @@
 #ifndef ABOUT_H
 #define ABOUT_H
 
-#include <QDialog>
+#include "framelessdialog.h"
 #include <QObject>
 
-class About : public QDialog
+class About : public FramelessDialog
 {
     Q_OBJECT
 public:

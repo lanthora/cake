@@ -1,9 +1,10 @@
+#include "confirmdialog.h"
 #include "mainwindow.h"
 #include <QApplication>
 #include <QDir>
-#include <QMessageBox>
 #include <QSharedMemory>
 #include <QStandardPaths>
+#include <QStyleFactory>
 #include <Poco/AutoPtr.h>
 #include <Poco/FileChannel.h>
 #include <Poco/FormattingChannel.h>
@@ -72,12 +73,11 @@ int main(int argc, char *argv[])
 #endif
 
     QApplication a(argc, argv);
+    QApplication::setStyle(QStyleFactory::create("Fusion"));
     QSharedMemory shared("canets.org/cake");
     if (shared.attach()) {
-        QMessageBox msgBox;
-        msgBox.setIcon(QMessageBox::NoIcon);
-        msgBox.setWindowTitle("Cake");
-        msgBox.setText("Another instance is already running");
+        ConfirmDialog msgBox("Cake", "Another instance is already running");
+        msgBox.setConfirmButton("OK", ConfirmDialog::PrimaryButton);
         msgBox.exec();
         return 0;
     }

@@ -4,11 +4,10 @@
 #include <QVBoxLayout>
 
 About::About(QWidget *parent)
-    : QDialog(parent)
+    : FramelessDialog("About", parent)
 {
-    setWindowTitle("About");
-    resize(400, 200);
-    setMinimumSize(360, 180);
+    resize(400, 220);
+    setMinimumSize(360, 200);
 
     QLabel *title = new QLabel("Cake", this);
     title->setObjectName("aboutTitle");
@@ -28,11 +27,13 @@ About::About(QWidget *parent)
     desc->setOpenExternalLinks(true);
     desc->setWordWrap(true);
 
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(32, 28, 32, 28);
+    QVBoxLayout *layout = contentLayout();
+    layout->setContentsMargins(32, 24, 32, 24);
     layout->setSpacing(4);
+    layout->addStretch();
     layout->addWidget(title);
     layout->addWidget(version);
     layout->addSpacing(16);
     layout->addWidget(desc);
+    layout->addStretch();
 }

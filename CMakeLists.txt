@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.28)
 project(cake LANGUAGES CXX)
 
 set (CANDY_VERSION "6.1.9")
-set (CAKE_RELEASE "1")
+set (CAKE_RELEASE "2")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -25,6 +25,9 @@ add_executable(cake
     candyitem.h candyitem.cc
     detailarea.h detailarea.cc
     startoption.h startoption.cc
+    confirmdialog.h confirmdialog.cc
+    framelessdialog.h framelessdialog.cc
+    titlebar.h titlebar.cc
     feedback.h feedback.cc
 
     update.h update.cc

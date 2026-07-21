@@ -1,10 +1,10 @@
 #ifndef FEEDBACK_H
 #define FEEDBACK_H
 
-#include <QDialog>
+#include "framelessdialog.h"
 #include <QObject>
 
-class Feedback : public QDialog
+class Feedback : public FramelessDialog
 {
     Q_OBJECT
 public:

@@ -1,17 +1,32 @@
 #include "startoption.h"
 #include <QApplication>
 #include <QDir>
+#include <QLabel>
 #include <QPushButton>
 #include <QSysInfo>
 #include <QSystemTrayIcon>
 #include <QVBoxLayout>
 
-StartOption::StartOption(QWidget *parent)
-    : QDialog(parent)
+static QWidget *wrapOption(QCheckBox *checkBox, const QString &hint)
 {
-    setWindowTitle("Startup");
-    resize(400, 240);
-    setMinimumSize(360, 200);
+    QWidget *wrapper = new QWidget;
+    QVBoxLayout *layout = new QVBoxLayout(wrapper);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(2);
+    layout->addWidget(checkBox);
+    QLabel *hintLabel = new QLabel(hint, wrapper);
+    hintLabel->setObjectName("dialogHint");
+    hintLabel->setWordWrap(true);
+    hintLabel->setContentsMargins(26, 0, 0, 0);
+    layout->addWidget(hintLabel);
+    return wrapper;
+}
+
+StartOption::StartOption(QWidget *parent)
+    : FramelessDialog("Startup", parent)
+{
+    resize(440, 340);
+    setMinimumSize(400, 300);
 
     if (QSysInfo::productType() == "windows") {
         autoStartup->setChecked(settings.value("autostartup", true).toBool());
@@ -29,19 +44,27 @@ StartOption::StartOption(QWidget *parent)
 
     updateCheck->setChecked(settings.value("updatecheck", true).toBool());
 
+    QLabel *subtitle = new QLabel("Configure how Cake behaves on startup.", this);
+    subtitle->setObjectName("dialogSubtitle");
+    subtitle->setWordWrap(true);
+
     QPushButton *saveButton = new QPushButton("Save", this);
     saveButton->setObjectName("primaryButton");
     saveButton->setMaximumWidth(100);
     connect(saveButton, &QPushButton::clicked, this, &StartOption::save);
 
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(24, 20, 24, 20);
-    layout->setSpacing(10);
-    layout->addWidget(autoStartup);
-    layout->addWidget(showMainWindow);
-    layout->addWidget(updateCheck);
+    QVBoxLayout *layout = contentLayout();
+    layout->setContentsMargins(32, 20, 32, 20);
+    layout->setSpacing(8);
+    layout->addWidget(subtitle);
     layout->addSpacing(8);
-    layout->addWidget(saveButton, 0, Qt::AlignHCenter);
+    layout->addWidget(wrapOption(autoStartup, "Automatically launch Cake when you sign in to your system."));
+    layout->addSpacing(4);
+    layout->addWidget(wrapOption(showMainWindow, "Display the main window when Cake starts."));
+    layout->addSpacing(4);
+    layout->addWidget(wrapOption(updateCheck, "Automatically check for new versions on startup."));
+    layout->addStretch();
+    layout->addWidget(saveButton, 0, Qt::AlignRight);
 
     save();
 }

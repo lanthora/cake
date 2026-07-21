@@ -1,12 +1,12 @@
 #ifndef STARTOPTION_H
 #define STARTOPTION_H
 
+#include "framelessdialog.h"
 #include <QCheckBox>
-#include <QDialog>
 #include <QObject>
 #include <QSettings>
 
-class StartOption : public QDialog
+class StartOption : public FramelessDialog
 {
     Q_OBJECT
 public:
