@@ -2,7 +2,6 @@
 #define TITLEBAR_H
 
 #include <QLabel>
-#include <QPoint>
 #include <QWidget>
 
 class TitleBar : public QWidget
@@ -15,11 +14,9 @@ public:
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
     QLabel *titleLabel;
-    QPoint dragPosition;
 };
 
 #endif // TITLEBAR_H

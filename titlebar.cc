@@ -2,6 +2,7 @@
 #include <QHBoxLayout>
 #include <QMouseEvent>
 #include <QPushButton>
+#include <QWindow>
 
 TitleBar::TitleBar(const QString &title, QWidget *parent)
     : QWidget(parent)
@@ -38,16 +39,8 @@ void TitleBar::setTitle(const QString &title)
 
 void TitleBar::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton && window() != nullptr) {
-        dragPosition = event->globalPosition().toPoint() - window()->frameGeometry().topLeft();
-        event->accept();
+    if (event->button() == Qt::LeftButton && window() != nullptr && window()->windowHandle() != nullptr) {
+        window()->windowHandle()->startSystemMove();
     }
-}
-
-void TitleBar::mouseMoveEvent(QMouseEvent *event)
-{
-    if ((event->buttons() & Qt::LeftButton) && window() != nullptr) {
-        window()->move(event->globalPosition().toPoint() - dragPosition);
-        event->accept();
-    }
+    event->accept();
 }
