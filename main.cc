@@ -2,6 +2,8 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <QDir>
+#include <QFile>
+#include <QPalette>
 #include <QSharedMemory>
 #include <QStandardPaths>
 #include <QStyleFactory>
@@ -73,7 +75,18 @@ int main(int argc, char *argv[])
 #endif
 
     QApplication a(argc, argv);
-    QApplication::setStyle(QStyleFactory::create("Fusion"));
+    QStyle *fusionStyle = QStyleFactory::create("Fusion");
+    QApplication::setStyle(fusionStyle);
+    QPalette palette = fusionStyle->standardPalette();
+    palette.setColor(QPalette::Window, QColor("#f5f6f8"));
+    palette.setColor(QPalette::AlternateBase, QColor("#f5f6f8"));
+    a.setPalette(palette);
+
+    QFile styleFile(":/style.qss");
+    if (styleFile.open(QFile::ReadOnly)) {
+        a.setStyleSheet(QString::fromUtf8(styleFile.readAll()));
+        styleFile.close();
+    }
     QSharedMemory shared("canets.org/cake");
     if (shared.attach()) {
         ConfirmDialog msgBox("Cake", "Another instance is already running");

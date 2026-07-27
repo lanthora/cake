@@ -7,7 +7,6 @@
 #include "update.h"
 #include <QApplication>
 #include <QDesktopServices>
-#include <QFile>
 #include <QGraphicsDropShadowEffect>
 #include <QHBoxLayout>
 #include <QIcon>
@@ -26,12 +25,6 @@ MainWindow::MainWindow(QWidget *parent)
     resize(900, 640);
     setMinimumSize(760, 560);
     setWindowIcon(QIcon(":/logo.ico"));
-
-    QFile styleFile(":/style.qss");
-    if (styleFile.open(QFile::ReadOnly)) {
-        setStyleSheet(styleFile.readAll());
-        styleFile.close();
-    }
 
     titleBar = new TitleBar("Cake", this);
     mainMenuBar = new QMenuBar(this);

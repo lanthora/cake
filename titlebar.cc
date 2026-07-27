@@ -11,11 +11,15 @@ TitleBar::TitleBar(const QString &title, QWidget *parent)
     setFixedHeight(38);
 
     auto *layout = new QHBoxLayout(this);
-    layout->setContentsMargins(16, 0, 8, 0);
+    layout->setContentsMargins(8, 0, 8, 0);
     layout->setSpacing(0);
+
+    layout->addSpacing(44);
 
     titleLabel = new QLabel(title, this);
     titleLabel->setObjectName("titleBarText");
+    titleLabel->setAlignment(Qt::AlignCenter);
+    layout->addStretch();
     layout->addWidget(titleLabel);
     layout->addStretch();
 
