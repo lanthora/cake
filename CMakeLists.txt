@@ -25,6 +25,7 @@ add_executable(cake
     candyitem.h candyitem.cc
     detailarea.h detailarea.cc
     startoption.h startoption.cc
+    privilege.h privilege.cc
     confirmdialog.h confirmdialog.cc
     framelessdialog.h framelessdialog.cc
     titlebar.h titlebar.cc

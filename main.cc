@@ -1,9 +1,11 @@
 #include "confirmdialog.h"
 #include "mainwindow.h"
+#include "privilege.h"
 #include <QApplication>
 #include <QDir>
 #include <QFile>
 #include <QPalette>
+#include <QProcess>
 #include <QSharedMemory>
 #include <QStandardPaths>
 #include <QStyleFactory>
@@ -87,6 +89,26 @@ int main(int argc, char *argv[])
         a.setStyleSheet(QString::fromUtf8(styleFile.readAll()));
         styleFile.close();
     }
+
+#ifdef Q_OS_LINUX
+    while (!privilege::hasNetAdmin()) {
+        ConfirmDialog dialog("Cake", "Cake needs the CAP_NET_ADMIN privilege to create the virtual network device.\n\nGrant it now?");
+        dialog.setConfirmButton("Authorize", ConfirmDialog::PrimaryButton);
+        if (dialog.exec() != QDialog::Accepted)
+            return 0;
+
+        if (privilege::fixWithPkexec(QCoreApplication::applicationFilePath())) {
+            QProcess::startDetached(QCoreApplication::applicationFilePath(),
+                                    QApplication::arguments().mid(1));
+            return 0;
+        }
+
+        ConfirmDialog failed("Cake", "Failed to grant CAP_NET_ADMIN. Please try again.");
+        failed.setConfirmButton("OK", ConfirmDialog::PrimaryButton);
+        failed.exec();
+    }
+#endif
+
     QSharedMemory shared("canets.org/cake");
     if (shared.attach()) {
         ConfirmDialog msgBox("Cake", "Another instance is already running");
