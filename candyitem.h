@@ -2,6 +2,8 @@
 #define CANDYITEM_H
 
 #include <QString>
+#include <atomic>
+#include <memory>
 #include <string>
 #include <thread>
 
@@ -18,6 +20,7 @@ private:
     QString m_name;
     std::string id;
     std::thread clientThread;
+    std::shared_ptr<std::atomic<bool>> clientDone;
     bool started = false;
 };
 

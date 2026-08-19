@@ -3,6 +3,7 @@
 #include <Poco/JSON/Object.h>
 #include <Poco/JSON/Stringifier.h>
 #include <QSettings>
+#include <chrono>
 
 CandyItem::CandyItem(const QString &name)
     : m_name(name)
@@ -47,12 +48,37 @@ void CandyItem::update()
     settings.endGroup();
     settings.sync();
 
+    std::thread previous;
+    std::shared_ptr<std::atomic<bool>> previousDone;
     if (started) {
-        candy::client::shutdown(id);
-        if (clientThread.joinable()) {
-            clientThread.join();
-        }
+        previous = std::move(clientThread);
+        previousDone = std::move(clientDone);
     }
     started = true;
-    clientThread = std::thread([=]() { candy::client::run(id, config); });
+
+    auto done = std::make_shared<std::atomic<bool>>(false);
+    clientDone = done;
+
+    const std::string idCopy = id;
+    clientThread = std::thread(
+        [id = idCopy, config, done,
+         previous = std::move(previous),
+         previousDone = std::move(previousDone)]() mutable {
+            if (previous.joinable()) {
+                while (!previousDone->load()) {
+                    candy::client::shutdown(id);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                }
+                previous.join();
+            }
+            struct DoneGuard {
+                std::shared_ptr<std::atomic<bool>> d;
+                explicit DoneGuard(std::shared_ptr<std::atomic<bool>> d)
+                    : d(std::move(d))
+                {
+                }
+                ~DoneGuard() { d->store(true); }
+            } guard(done);
+            candy::client::run(id, config);
+        });
 }
