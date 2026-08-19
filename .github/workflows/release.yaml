@@ -2,61 +2,61 @@ name: release
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   release:
-    types: [ published ]
+    types: [published]
 
 jobs:
   windows:
     runs-on: windows-latest
     steps:
-    - name: depends
-      uses: msys2/setup-msys2@v2
-      with:
-        msystem: MINGW64
-        install: >-
-          mingw-w64-x86_64-cmake
-          mingw-w64-x86_64-ninja
-          mingw-w64-x86_64-gcc
-          mingw-w64-x86_64-spdlog
-          mingw-w64-x86_64-poco
-          mingw-w64-x86_64-qt6-base
-    - name: checkout
-      uses: actions/checkout@v4
-    - name: cache
-      uses: actions/cache@v4
-      with:
-        path: build
-        key: ${{ hashFiles('CMakeLists.txt') }}
-    - name: build
-      shell: msys2 {0}
-      run: |
-        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="target" -DCMAKE_INSTALL_BINDIR="artifacts"
-        cmake --build build
-        cmake --install build
-    - name: collect
-      shell: msys2 {0}
-      run: |
-        ./winqtcollect.sh target/artifacts/cake.exe target/artifacts
-        cp build/_deps/candy-build/candy/wintun/bin/amd64/wintun.dll target/artifacts
-        cp logo.ico target
-        cp build/setup.iss target
-    - name: installer
-      uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
-      with:
-        path: target/setup.iss
-    - name: upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: cake-portable
-        path: target/artifacts
-    - name: upload installer
-      uses: actions/upload-artifact@v4
-      with:
-        name: cake-installer
-        path: target/installer
-    - name: release
-      uses: softprops/action-gh-release@v2
-      if: github.event_name == 'release'
-      with:
-        files: target/installer/*.exe
+      - name: depends
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: >-
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-spdlog
+            mingw-w64-x86_64-poco
+            mingw-w64-x86_64-qt6-base
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: cache
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: ${{ hashFiles('CMakeLists.txt') }}
+      - name: build
+        shell: msys2 {0}
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="target" -DCMAKE_INSTALL_BINDIR="artifacts"
+          cmake --build build
+          cmake --install build
+      - name: collect
+        shell: msys2 {0}
+        run: |
+          ./winqtcollect.sh target/artifacts/cake.exe target/artifacts
+          cp build/_deps/candy-build/candy/wintun/bin/amd64/wintun.dll target/artifacts
+          cp logo.ico target
+          cp build/setup.iss target
+      - name: installer
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
+        with:
+          path: target/setup.iss
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cake-portable
+          path: target/artifacts
+      - name: upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: cake-installer
+          path: target/installer
+      - name: release
+        uses: softprops/action-gh-release@v2
+        if: github.event_name == 'release'
+        with:
+          files: target/installer/*.exe
