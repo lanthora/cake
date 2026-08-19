@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Cake
+GenericName=Mesh Network Client
+Comment=GUI client for the candy peer-to-peer mesh network
+Exec=cake
+Icon=cake
+Terminal=false
+Categories=Network;FileTransfer;Utility;
+StartupWMClass=Cake
+StartupNotify=true
